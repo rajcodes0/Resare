@@ -12,16 +12,17 @@ const registerUser = async (req, res) => {
     }
     // existing user
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
     // create user
-    const user = await User.create({
+    const user = new User({
       username,
       email: email.toLowerCase(),
       password,
     });
+    await user.save();
     res.status(201).json({
       message: "user registerd successfuly",
       user: {
@@ -43,7 +44,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -59,19 +60,20 @@ const loginUser = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
-    });
+   res.cookie("accessToken", accessToken, {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  maxAge: 15 * 60 * 1000,
+});
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
     
     res.json({
       message:"Login Successful ",
@@ -109,12 +111,13 @@ if(!user || user.refreshToken !== refreshToken){
 
 const newAccessToken = generateToken(user._id);
 
-res.cookie("accessToken",newAccessToken,{
-  httpOnly:true,
-  secure:process.env.NODE_ENV === "production",
-  sameSite:"strict",
-  maxAge : 15 * 60 * 1000,
+res.cookie("accessToken", newAccessToken, {
+  httpOnly: true,
+  secure: false,      // ✅ MUST be false on localhost
+  sameSite: "lax",    // ✅ MUST be lax for Postman/browser
+  maxAge: 15 * 60 * 1000,
 });
+
 
 res.json({message: "Access token refreshed"});
 

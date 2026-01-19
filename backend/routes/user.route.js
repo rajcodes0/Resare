@@ -1,13 +1,19 @@
-import { Router } from "express";
-import { registerUser, loginUser,refreshAccessToken } from '../controllers/user.controllers.js';
-const router = Router();
+import express from "express";
+import {
+  registerUser,
+  loginUser,
+  refreshAccessToken
+} from "../controllers/user.controllers.js";
+import forgotPassword from "../controllers/forgot-password.js";
+import { resetPassword } from "../controllers/reset-password.controller.js";
 
-router.route("/register").post(registerUser);
-router.route("/login").post(loginUser);
-router.post("/refresh-token",refreshAccessToken)
+const router = express.Router();
+
+// PUBLIC
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+router.post("/refresh-token", refreshAccessToken);
 
-
-export default router
-
+export default router;

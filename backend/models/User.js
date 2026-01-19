@@ -1,61 +1,79 @@
 import mongoose from "mongoose";
-
 import bcrypt from "bcryptjs";
 
 const allowedDomains = [
   "gmail.com",
   "yahoo.com",
   "outlook.com",
-  "hotmail.com",
   "icloud.com",
   "proton.me",
   "protonmail.com",
 ];
+
 const UserSchema = new mongoose.Schema(
   {
     username: {
       type: String,
       required: true,
-      unique: true,
-      lowercase: true,
       trim: true,
       minlength: 3,
-      maxlength: 13,
+      maxlength: 30
     },
+
     email: {
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
       trim: true,
       index: true,
       validate: {
         validator: function (value) {
+          // Allow all domains for OAuth users
+          if (this.provider !== "local") return true;
+
           const domain = value.split("@")[1];
           return allowedDomains.includes(domain);
         },
-        message: "Email provider not supported",
-      },
+        message: "Email provider not supported"
+      }
     },
+
     password: {
       type: String,
-      required: true,
       minlength: 6,
+      required: function () {
+        return this.provider === "local";
+      }
     },
-    refreshToken: {
+
+    provider: {
       type: String,
+      enum: ["local", "google", "github", "apple"],
+      default: "local"
     },
+
+    providerId: {
+      type: String
+    },
+
+    refreshToken: {
+      type: String
+    },
+
     resetPasswordToken: String,
-    resetPasswordExpire: Date,
+    resetPasswordExpire: Date
   },
   { timestamps: true }
 );
 
-UserSchema.pre("save", async function (user_id) {
-  if (!this.isModified("password")) return this._id;
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next;
+  if (!this.password) return next;
+
   this.password = await bcrypt.hash(this.password, 10);
-  this._id;
+  next;
 });
+
 
 const User = mongoose.model("User", UserSchema);
 export default User;
