@@ -1,15 +1,17 @@
 import multer from "multer";
+import path from "path";
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
     cb(null, "./public/temp");
   },
-  filename: function(req, file, cb) {  // ✅ FIXED: "filename" not "fileName"
-    cb(null, file.originalname);
-  }  // ✅ FIXED: Added closing brace
+ filename: function(req, file, cb) {
+  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+  cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+}
 });
 
 export const upload = multer({
   storage,
-  limits: { fileSize: 25 * 1024 * 1024 }  // ✅ FIXED: Moved limits here
+  limits: { fileSize: 25 * 1024 * 1024 }
 });

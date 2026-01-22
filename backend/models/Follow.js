@@ -20,18 +20,26 @@ const followSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
     followedAt: {
       type: Date,
-      required: true,
+      default: Date.now, // ✅ FIX
     },
 
-    accessGranted: {
+    unlockAt: {
+      type: Date,
+      required: true, // ✅ CORE FEATURE
+    },
+
+    isActive: {
       type: Boolean,
-      default: true,
+      default: true, // ✅ unfollow after 30 days
     },
   },
   { timestamps: true }
 );
 
-followSchema.index({userId: 1, creatorId: 1},{unique:true});
-export default mongoose.model("follow", followSchema);
+// prevent duplicate follows
+followSchema.index({ userId: 1, creatorId: 1 }, { unique: true });
+
+export default mongoose.model("Follow", followSchema);

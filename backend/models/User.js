@@ -65,15 +65,16 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+UserSchema.pre("save", async function () {
+  // 1. If password hasn't changed, do nothing and return
+  if (!this.isModified("password")) return;
 
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next;
-  if (!this.password) return next;
+  // 2. If it's an OAuth user with no password, do nothing and return
+  if (!this.password) return;
 
+  // 3. Hash the password
   this.password = await bcrypt.hash(this.password, 10);
-  next;
 });
-
 
 const User = mongoose.model("User", UserSchema);
 export default User;

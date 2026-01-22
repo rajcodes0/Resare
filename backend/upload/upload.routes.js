@@ -6,7 +6,7 @@ import { authMiddleware } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.post("/test-upload", authMiddleware, upload.single("File"), async (req, res) => {
+router.post("/test-upload", upload.single("file"),authMiddleware, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
