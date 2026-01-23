@@ -16,27 +16,30 @@ const followSchema = new mongoose.Schema(
       index: true,
     },
 
-    clickedSocial: {
-      type: Boolean,
-      default: false,
+    socialAction: {
+      platform: {
+        type: String,
+        enum: ["instagram", "twitter", "linkedin"],
+      },
+      clickedAt: Date,
     },
 
     followedAt: {
       type: Date,
-      default: Date.now, // ✅ FIX
+      default: Date.now, 
     },
 
     unlockAt: {
       type: Date,
-      required: true, // ✅ CORE FEATURE
+      required: true, 
     },
 
     isActive: {
       type: Boolean,
-      default: true, // ✅ unfollow after 30 days
+      default: true, 
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // prevent duplicate follows
