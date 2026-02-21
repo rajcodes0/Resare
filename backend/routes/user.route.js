@@ -4,6 +4,7 @@ import {
   loginUser,
   refreshAccessToken
 } from "../controllers/user.controllers.js";
+import { authMiddleware } from "../middlewares/auth.js";
 import forgotPassword from "../controllers/forgot-password.js";
 import { resetPassword } from "../controllers/reset-password.controller.js";
 
@@ -15,5 +16,10 @@ router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 router.post("/refresh-token", refreshAccessToken);
+router.post("/logout", authMiddleware, (req, res) => {
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+  res.json({ message: "Logged out" });
+});
 
 export default router;
