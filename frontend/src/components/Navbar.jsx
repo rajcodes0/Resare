@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import User from "../../public/user.jpg";
+import User from "../assets/user.jpg";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -8,8 +8,8 @@ function Navbar() {
   return (
     <nav className="flex justify-between items-center m-2 p-3 bg-sky-400 text-white rounded-xl">
 
-      {/* Logo */}
-      <span className="font-bold text-2xl">Resare</span>
+
+    <Link to='/' className="font-bold text-2xl">Resare</Link>
 
       {/* Links */}
       <div className="flex gap-4">

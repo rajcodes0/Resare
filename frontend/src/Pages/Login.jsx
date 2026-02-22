@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import forgotPassword from "../Pages/ForgotPassword.jsx";
+
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -93,7 +93,7 @@ function Login() {
         </button>
 
         <span>
-          {" "}
+         
           <Link to="/forgotPassword"> ForgotPassword</Link>
         </span>
       </form>
