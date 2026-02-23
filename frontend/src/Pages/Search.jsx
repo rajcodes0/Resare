@@ -91,7 +91,7 @@ function Search() {
                 {files.map((file) => (
                   <div key={file._id} className="flex items-center gap-4 px-5 py-3.5 transition-colors duration-200 hover:bg-white/[0.02] group">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "#ffffff08" }}>
-                      {fileIcon(file.document?.fileType)}
+                      {fileIcon(file.document?.fileType || 'other')}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" style={{ color: "#e2e8f0" }}>
@@ -101,7 +101,7 @@ function Search() {
                         By {file.creatorId?.username || "Unknown"}
                       </p>
                     </div>
-                    <Link to={`/FileDetail`} className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10" title="View">
+                    <Link to={`/FileDetail?id=${file._id}`} className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10" title="View">
                       <ChevronRight size={15} style={{ color: "#818cf8" }} />
                     </Link>
                   </div>
@@ -129,7 +129,7 @@ function Search() {
                         {profile.username}
                       </p>
                     </div>
-                    <Link to={`/CreatorProfile`} className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10" title="View Profile">
+                    <Link to={`/CreatorProfile?id=${profile._id}`} className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10" title="View Profile">
                       <ChevronRight size={15} style={{ color: "#34d399" }} />
                     </Link>
                   </div>

@@ -13,7 +13,10 @@ router.get("/", authMiddleware, async (req, res) => {
     
     if (q) {
       // Search by partial filename (case-insensitive)
-      query["document.originalName"] = { $regex: q, $options: "i" };
+      query.$or = [
+        { "document.originalName": { $regex: q, $options: "i" } },
+        // Also could search by tags if they existed in the model
+      ];
     }
 
     const files = await File.find(query)

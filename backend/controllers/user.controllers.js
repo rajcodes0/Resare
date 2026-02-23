@@ -24,6 +24,7 @@ const registerUser = async (req, res) => {
     });
     await user.save();
     res.status(201).json({
+      success: true,
       message: "user registerd successfuly",
       user: {
         id: user._id,
@@ -76,6 +77,7 @@ res.cookie("refreshToken", refreshToken, {
 
     
     res.json({
+      success: true,
       message:"Login Successful ",
       user:{
         id:user._id,
