@@ -141,9 +141,9 @@ export const searchProfiles = async (req, res) => {
       username: { $regex: q, $options: "i" }
     }).select("username email");
     
-    res.json({ users });
+    res.json({ success: true, users });
   } catch (error) {
-    res.status(500).json({ message: "Failed to search profiles", error: error.message });
+    res.status(500).json({ success: false, message: "Failed to search profiles", error: error.message });
   }
 };
 

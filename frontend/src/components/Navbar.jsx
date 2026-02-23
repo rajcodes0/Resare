@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import userImg from "../assets/user.jpg";
 import {
   Home,
@@ -14,6 +14,7 @@ import {
   Settings,
   KeyRound,
   LogOut,
+  Search as SearchIcon,
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -34,6 +35,7 @@ function Navbar() {
   const [dropOpen, setDropOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // close dropdown when route changes
   useEffect(() => {
@@ -109,6 +111,24 @@ function Navbar() {
                 {label}
               </Link>
             ))}
+          </div>
+
+          {/* ── Search Bar ── */}
+          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl ml-4 mr-auto" style={{ background: "#ffffff08", border: "1px solid #ffffff10", width: "220px" }}>
+            <SearchIcon size={14} style={{ color: "#64748b" }} />
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const q = e.target.search.value.trim();
+              if (q) navigate(`/Search?q=${encodeURIComponent(q)}`);
+            }}>
+              <input
+                name="search"
+                autoComplete="off"
+                placeholder="Search files, creators..."
+                className="bg-transparent outline-none text-xs w-full"
+                style={{ color: "#cbd5e1" }}
+              />
+            </form>
           </div>
 
           {/* ── Right: auth + avatar ── */}
