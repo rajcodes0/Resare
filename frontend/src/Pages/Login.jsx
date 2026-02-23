@@ -1,102 +1,197 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { Mail, Lock, LogIn, Eye, EyeOff, CloudUpload } from "lucide-react";
 
+const bg = "linear-gradient(135deg, #0f0c29 0%, #1a1a3e 45%, #24243e 100%)";
+const gradText = {
+  background: "linear-gradient(135deg, #e0e7ff, #c4b5fd, #818cf8)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+};
+
+const toastStyle = (success) => ({
+  borderRadius: "12px",
+  background: "#1e1e2e",
+  color: success ? "#4ade80" : "#f87171",
+  border: `1px solid ${success ? "#4ade8033" : "#f8717133"}`,
+});
+
+function InputField({ icon: Icon, type, name, placeholder, value, onChange }) {
+  const [showPw, setShowPw] = useState(false);
+  const isPassword = type === "password";
+  const [focused, setFocused] = useState(false);
+
+  return (
+    <div
+      className="flex items-center gap-3 px-4 py-3 rounded-xl w-full transition-all duration-200"
+      style={{
+        background: "#ffffff08",
+        border: focused ? "1px solid #6366f160" : "1px solid #ffffff12",
+        boxShadow: focused ? "0 0 0 3px #6366f110" : "none",
+      }}
+    >
+      <Icon size={16} style={{ color: focused ? "#818cf8" : "#475569", flexShrink: 0 }} />
+      <input
+        type={isPassword && showPw ? "text" : type}
+        name={name}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        className="flex-1 bg-transparent outline-none text-sm"
+        style={{ color: "#e2e8f0" }}
+        autoComplete={isPassword ? "current-password" : "email"}
+      />
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => setShowPw((v) => !v)}
+          style={{ color: "#475569" }}
+          className="hover:text-indigo-400 transition-colors"
+        >
+          {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+        </button>
+      )}
+    </div>
+  );
+}
 
 function Login() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  const handleForm = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const handleChange = (e) =>
+    setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/v1/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const data = await res.json();
-      console.log(data);
-
+      const { data } = await axios.post(
+        "http://localhost:5000/api/v1/auth/login",
+        { email: formData.email, password: formData.password }
+      );
       if (data.success) {
-        alert("Login Success");
+        toast.success("Welcome back! 🎉", { style: toastStyle(true) });
+        navigate("/Dashboard");
       } else {
-        alert(data.message || "Login Failed");
+        toast.error(data.message || "Login failed", { style: toastStyle(false) });
       }
-    } catch (error) {
-      console.error(error);
-      alert("Server error");
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Server error. Try again.",
+        { style: toastStyle(false) }
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full h-screen flex justify-center items-center  flex-col bg-black">
-      <h1 className="text-3xl font-bold mb-5 text-sky-500">Login</h1>
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col items-center border-4 p-5 rounded-2xl  w-[450px] aspect-square justify-center bg-sky-50"
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: bg }}
+    >
+      {/* ambient orb */}
+      <div style={{ position: "fixed", top: "-10%", left: "-8%", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, #6366f116 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", bottom: "-8%", right: "-5%", width: "400px", height: "400px", borderRadius: "50%", background: "radial-gradient(circle, #8b5cf612 0%, transparent 70%)", pointerEvents: "none" }} />
+
+      <div
+        className="relative w-full max-w-md rounded-3xl p-8 flex flex-col gap-6"
+        style={{
+          background: "linear-gradient(135deg, #ffffff0a, #ffffff04)",
+          border: "1px solid #ffffff14",
+          boxShadow: "0 24px 64px #00000050",
+          backdropFilter: "blur(16px)",
+        }}
       >
-        <input
-          type="text"
-          name="name"
-          placeholder="your name please"
-          value={formData.name}
-          onChange={handleForm}
-          className="bg-black text-2xl text-white rounded-2xl p-3 mt-5 "
-        />
+        {/* logo */}
+        <div className="flex flex-col items-center gap-3 mb-2">
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 8px 24px #6366f135" }}
+          >
+            <CloudUpload size={22} style={{ color: "#fff" }} />
+          </div>
+          <h1 className="text-2xl font-bold" style={gradText}>Welcome back</h1>
+          <p className="text-sm text-center" style={{ color: "#64748b" }}>Sign in to your Resare account</p>
+        </div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="your email please"
-          value={formData.email}
-          onChange={handleForm}
-          className="bg-black text-2xl text-white rounded-2xl p-3 mt-5"
-        />
+        {/* form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium" style={{ color: "#64748b" }}>Email</label>
+            <InputField
+              icon={Mail}
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="your password please"
-          value={formData.password}
-          onChange={handleForm}
-          className="bg-black text-2xl text-white rounded-2xl p-3 mt-5"
-        />
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium" style={{ color: "#64748b" }}>Password</label>
+              <Link to="/ForgotPassword" className="text-xs transition-colors hover:text-indigo-400" style={{ color: "#818cf8" }}>
+                Forgot password?
+              </Link>
+            </div>
+            <InputField
+              icon={Lock}
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className={`px-30 w-100% py-3 m-5 rounded-xl text-white ${
-            loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
-          }`}
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-2 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              color: "#fff",
+              boxShadow: "0 6px 20px #6366f135",
+            }}
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Signing in…
+              </span>
+            ) : (
+              <><LogIn size={15} /> Sign In</>
+            )}
+          </button>
+        </form>
+
+        {/* divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px" style={{ background: "#ffffff10" }} />
+          <span className="text-xs" style={{ color: "#334155" }}>New here?</span>
+          <div className="flex-1 h-px" style={{ background: "#ffffff10" }} />
+        </div>
+
+        <Link
+          to="/Register"
+          className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+          style={{
+            background: "#ffffff08",
+            border: "1px solid #ffffff12",
+            color: "#c4b5fd",
+          }}
         >
-          {loading ? "Logging..." : "Submit"}
-        </button>
-
-        <span>
-         
-          <Link to="/forgotPassword"> ForgotPassword</Link>
-        </span>
-      </form>
+          Create an account →
+        </Link>
+      </div>
     </div>
   );
 }

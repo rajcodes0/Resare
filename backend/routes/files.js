@@ -2,20 +2,24 @@ import express from "express";
 import { authMiddleware } from "../middlewares/auth.js";
 import { checkFileAccess } from "../middlewares/checkFileAccess.js";
 import { downloadFile } from "../controllers/file-controller.js";
+import { File } from "../models/File.js";
 
 const router = express.Router();
 
-// router.get(
-//   "/:fileId",
-//   authMiddleware,
-//   checkFileAccess,
-//   downloadFile
-// );
-
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const files = await File.find({ accessType: { $ne: "private" } })
-      .populate("creatorId", "username");
+    const { q } = req.query;
+    const query = { accessType: { $ne: "private" } };
+    
+    if (q) {
+      // Search by partial filename (case-insensitive)
+      query["document.originalName"] = { $regex: q, $options: "i" };
+    }
+
+    const files = await File.find(query)
+      .populate("creatorId", "username")
+      .sort({ createdAt: -1 });
+      
     res.json({ files });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch files" });

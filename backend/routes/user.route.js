@@ -2,7 +2,8 @@ import express from "express";
 import {
   registerUser,
   loginUser,
-  refreshAccessToken
+  refreshAccessToken,
+  searchProfiles
 } from "../controllers/user.controllers.js";
 import { authMiddleware } from "../middlewares/auth.js";
 import forgotPassword from "../controllers/forgot-password.js";
@@ -11,6 +12,7 @@ import { resetPassword } from "../controllers/reset-password.controller.js";
 const router = express.Router();
 
 // PUBLIC
+router.get("/search", searchProfiles);
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);

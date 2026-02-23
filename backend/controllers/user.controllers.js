@@ -129,8 +129,23 @@ res.json({message: "Access token refreshed"});
   
 }
 
-export {registerUser,loginUser,refreshAccessToken}
+export const searchProfiles = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) return res.json({ users: [] });
+    
+    // search username for text
+    const users = await User.find({
+      username: { $regex: q, $options: "i" }
+    }).select("username email");
+    
+    res.json({ users });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to search profiles", error: error.message });
+  }
+};
 
+export {registerUser,loginUser,refreshAccessToken}
 
 
 
