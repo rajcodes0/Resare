@@ -105,10 +105,15 @@ function ResetPassword() {
         password: form.password,
       });
       if (data.success) {
-        setDone(true);
+         setDone(true)
         toast.success("Password reset successfully!", {
           style: toastStyle(true),
+         
         });
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+        
       } else {
         toast.error(data.message || "Reset failed", {
           style: toastStyle(false),
