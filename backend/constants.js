@@ -1,1 +1,1 @@
-export const DB_NAME  = Resare
+export const DB_NAME = "Resare";

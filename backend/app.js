@@ -1,6 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import dotenv from"dotenv"
 
 import uploadRoutes from "./upload/upload.routes.js";
 import authRoutes from "./routes/user.route.js";
@@ -11,6 +12,7 @@ import followRoutes from "./routes/follow.js";
 
 const app = express();
 
+dotenv.config()
 // ─── Core ───
 app.use(cors({
   origin: process.env.CORS_ORIGIN,

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import toast from "react-hot-toast";
 import { Mail, ArrowLeft, Send, CloudUpload } from "lucide-react";
 
@@ -31,21 +31,21 @@ function ForgotPassword() {
     }
     setLoading(true);
     try {
-      const { data } = await axios.post(
-        "http://localhost:5000/api/v1/auth/forgot-password",
-        { email }
-      );
+      const { data } = await api.post("/v1/auth/forgot-password", { email });
       if (data.success) {
         setSent(true);
-        toast.success("Reset link sent! Check your inbox 📬", { style: toastStyle(true) });
+        toast.success("Reset link sent! Check your inbox 📬", {
+          style: toastStyle(true),
+        });
       } else {
-        toast.error(data.message || "Something went wrong", { style: toastStyle(false) });
+        toast.error(data.message || "Something went wrong", {
+          style: toastStyle(false),
+        });
       }
     } catch (err) {
-      toast.error(
-        err?.response?.data?.message || "Server error. Try again.",
-        { style: toastStyle(false) }
-      );
+      toast.error(err?.response?.data?.message || "Server error. Try again.", {
+        style: toastStyle(false),
+      });
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,18 @@ function ForgotPassword() {
       style={{ background: bg }}
     >
       {/* orbs */}
-      <div style={{ position: "fixed", top: "-10%", left: "-8%", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, #6366f116 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div
+        style={{
+          position: "fixed",
+          top: "-10%",
+          left: "-8%",
+          width: "500px",
+          height: "500px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, #6366f116 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
 
       <div
         className="relative w-full max-w-md rounded-3xl p-8 flex flex-col gap-6"
@@ -81,11 +92,16 @@ function ForgotPassword() {
         <div className="flex flex-col items-center gap-3">
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 8px 24px #6366f135" }}
+            style={{
+              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              boxShadow: "0 8px 24px #6366f135",
+            }}
           >
             <CloudUpload size={26} style={{ color: "#fff" }} />
           </div>
-          <h1 className="text-2xl font-bold" style={gradText}>Forgot password?</h1>
+          <h1 className="text-2xl font-bold" style={gradText}>
+            Forgot password?
+          </h1>
           <p className="text-sm text-center" style={{ color: "#64748b" }}>
             No worries. Enter your email and we'll send you a reset link.
           </p>
@@ -95,16 +111,26 @@ function ForgotPassword() {
           <>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium" style={{ color: "#64748b" }}>Email address</label>
+                <label
+                  className="text-xs font-medium"
+                  style={{ color: "#64748b" }}
+                >
+                  Email address
+                </label>
                 <div
                   className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
                   style={{
                     background: "#ffffff08",
-                    border: focused ? "1px solid #6366f160" : "1px solid #ffffff12",
+                    border: focused
+                      ? "1px solid #6366f160"
+                      : "1px solid #ffffff12",
                     boxShadow: focused ? "0 0 0 3px #6366f110" : "none",
                   }}
                 >
-                  <Mail size={16} style={{ color: focused ? "#818cf8" : "#475569" }} />
+                  <Mail
+                    size={16}
+                    style={{ color: focused ? "#818cf8" : "#475569" }}
+                  />
                   <input
                     type="email"
                     placeholder="you@example.com"
@@ -135,7 +161,9 @@ function ForgotPassword() {
                     Sending…
                   </span>
                 ) : (
-                  <><Send size={15} /> Send Reset Link</>
+                  <>
+                    <Send size={15} /> Send Reset Link
+                  </>
                 )}
               </button>
             </form>
@@ -146,14 +174,20 @@ function ForgotPassword() {
             className="flex flex-col items-center gap-4 py-4 px-6 rounded-2xl text-center"
             style={{ background: "#4ade8010", border: "1px solid #4ade8025" }}
           >
-            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "#4ade8020" }}>
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center"
+              style={{ background: "#4ade8020" }}
+            >
               <Mail size={22} style={{ color: "#4ade80" }} />
             </div>
             <div>
-              <p className="font-semibold text-sm" style={{ color: "#4ade80" }}>Check your inbox!</p>
+              <p className="font-semibold text-sm" style={{ color: "#4ade80" }}>
+                Check your inbox!
+              </p>
               <p className="text-xs mt-1" style={{ color: "#64748b" }}>
-                We sent a reset link to <strong style={{ color: "#94a3b8" }}>{email}</strong>.
-                It may take a minute.
+                We sent a reset link to{" "}
+                <strong style={{ color: "#94a3b8" }}>{email}</strong>. It may
+                take a minute.
               </p>
             </div>
             <button
@@ -169,7 +203,11 @@ function ForgotPassword() {
         {/* footer link */}
         <p className="text-xs text-center" style={{ color: "#334155" }}>
           Remember your password?{" "}
-          <Link to="/login" className="transition-colors hover:text-indigo-300" style={{ color: "#818cf8" }}>
+          <Link
+            to="/login"
+            className="transition-colors hover:text-indigo-300"
+            style={{ color: "#818cf8" }}
+          >
             Sign in
           </Link>
         </p>

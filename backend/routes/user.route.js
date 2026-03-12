@@ -3,7 +3,8 @@ import {
   registerUser,
   loginUser,
   refreshAccessToken,
-  searchProfiles
+  searchProfiles,
+  getUserProfile,
 } from "../controllers/user.controllers.js";
 import { authMiddleware } from "../middlewares/auth.js";
 import forgotPassword from "../controllers/forgot-password.js";
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // PUBLIC
 router.get("/search", searchProfiles);
+router.get("/profile/:userId", getUserProfile);
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);

@@ -1,11 +1,19 @@
 import React, { useState, useRef } from "react";
 import toast from "react-hot-toast";
-import { File, FileArchive, ImageUp, CloudUpload, CheckCircle2 } from "lucide-react";
+import {
+  File,
+  FileArchive,
+  ImageUp,
+  CloudUpload,
+  CheckCircle2,
+} from "lucide-react";
+import api from "../utils/api";
 
 function Upload() {
   const [file, setFile] = useState(null);
   const [active, setActive] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const inputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -37,36 +45,57 @@ function Upload() {
     return (bytes / 1048576).toFixed(1) + " MB";
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!file) {
-      toast.error("Please select a file first!", {
-        style: {
-          borderRadius: "12px",
-          background: "#1e1e2e",
-          color: "#f87171",
-          border: "1px solid #f8717133",
-        },
-      });
+      toast.error("Please select a file first!");
       return;
     }
-    console.log(file.name);
-    setActive(true);
-    toast.success("Upload Complete!", {
-      style: {
-        borderRadius: "12px",
-        background: "#1e1e2e",
-        color: "#4ade80",
-        border: "1px solid #4ade8033",
-      },
-    });
-  };
 
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File size exceeds 50MB limit");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await api.post("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.data.success || res.status === 201) {
+        setActive(true);
+        toast.success("Upload Complete!");
+        console.log("File uploaded:", res.data.file);
+        // Reset after 2 seconds
+        setTimeout(() => {
+          setFile(null);
+          setActive(false);
+        }, 2000);
+      }
+    } catch (error) {
+      const errorMsg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Upload failed";
+      toast.error(errorMsg);
+      console.error("Upload error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div
       className="w-full px-6 py-10 md:px-16 lg:px-28"
       style={{
-        background: "linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #24243e 100%)",
+        background:
+          "linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #24243e 100%)",
         minHeight: "calc(100vh - 64px)",
       }}
     >
@@ -77,7 +106,8 @@ function Upload() {
             <h1
               className="text-2xl font-bold"
               style={{
-                background: "linear-gradient(135deg, #e0e7ff, #c4b5fd, #818cf8)",
+                background:
+                  "linear-gradient(135deg, #e0e7ff, #c4b5fd, #818cf8)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -149,17 +179,17 @@ function Upload() {
           {/* File type icons row */}
           <div className="flex items-center gap-5 mt-1">
             {[
-              { Icon: FileArchive, label: "Archive" },
-              { Icon: File, label: "Document" },
-              { Icon: ImageUp, label: "Image" },
-            ].map(({ Icon, label }) => (
+              { component: FileArchive, label: "Archive" },
+              { component: File, label: "Document" },
+              { component: ImageUp, label: "Image" },
+            ].map(({ component: FileTypeIcon }) => (
               <div
-                key={label}
+                key={FileTypeIcon.displayName || FileTypeIcon.name || "icon"}
                 className="flex items-center gap-1.5 transition-transform hover:scale-105"
               >
-                <Icon size={14} style={{ color: "#64748b" }} />
+                <FileTypeIcon size={14} style={{ color: "#64748b" }} />
                 <span className="text-xs" style={{ color: "#64748b" }}>
-                  {label}
+                  {FileTypeIcon.displayName || FileTypeIcon.name || "File"}
                 </span>
               </div>
             ))}
@@ -191,7 +221,10 @@ function Upload() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: "#e2e8f0" }}>
+              <p
+                className="text-sm font-medium truncate"
+                style={{ color: "#e2e8f0" }}
+              >
                 {file.name}
               </p>
               <p className="text-xs" style={{ color: "#64748b" }}>

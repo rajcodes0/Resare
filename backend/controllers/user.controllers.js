@@ -61,31 +61,29 @@ const loginUser = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-   res.cookie("accessToken", accessToken, {
-  httpOnly: true,
-  secure: false,
-  sameSite: "lax",
-  maxAge: 15 * 60 * 1000,
-});
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 15 * 60 * 1000,
+    });
 
-res.cookie("refreshToken", refreshToken, {
-  httpOnly: true,
-  secure: false,
-  sameSite: "lax",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
-    
     res.json({
       success: true,
-      message:"Login Successful ",
-      user:{
-        id:user._id,
-        username:user.username,
-        email:user.email,
+      message: "Login Successful ",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
       },
-    })
-    
+    });
   } catch (error) {
     res.status(500).json({
       message: "Internal server error",
@@ -94,85 +92,92 @@ res.cookie("refreshToken", refreshToken, {
   }
 };
 
-const refreshAccessToken = async (req ,res) =>{
+const refreshAccessToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
-    if(!refreshToken){
-      return res.status(401).json({message:'no refresh Token'});
+    if (!refreshToken) {
+      return res.status(401).json({ message: "no refresh Token" });
     }
 
-const decoded  = jwt.verify(
-  refreshToken,
-  process.env.JWT_REFRESH_SECRET
-);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-const user = await User.findById(decoded.userId);
-if(!user || user.refreshToken !== refreshToken){
-  return res.status(403).json({message:"invalid refresh token"});
-}
+    const user = await User.findById(decoded.userId);
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(403).json({ message: "invalid refresh token" });
+    }
 
-const newAccessToken = generateToken(user._id);
+    const newAccessToken = generateToken(user._id);
 
-res.cookie("accessToken", newAccessToken, {
-  httpOnly: true,
-  secure: false,      // ✅ MUST be false on localhost
-  sameSite: "lax",    // ✅ MUST be lax for Postman/browser
-  maxAge: 15 * 60 * 1000,
-});
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: false, // ✅ MUST be false on localhost
+      sameSite: "lax", // ✅ MUST be lax for Postman/browser
+      maxAge: 15 * 60 * 1000,
+    });
 
-
-res.json({message: "Access token refreshed"});
-
+    res.json({ message: "Access token refreshed" });
   } catch (error) {
     res.status(403).json({
-      message:"Refresh Token expired"
-    })
+      message: "Refresh Token expired",
+    });
   }
-  
-}
+};
 
 export const searchProfiles = async (req, res) => {
   try {
     const { q } = req.query;
     if (!q) return res.json({ users: [] });
-    
+
     // search username for text
     const users = await User.find({
-      username: { $regex: q, $options: "i" }
+      username: { $regex: q, $options: "i" },
     }).select("username email");
-    
+
     res.json({ success: true, users });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to search profiles", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to search profiles",
+        error: error.message,
+      });
   }
 };
 
-export {registerUser,loginUser,refreshAccessToken}
+export const getUserProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId).select("-password -refreshToken");
 
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
 
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        bio: user.bio || "",
+        location: user.location || "",
+        followers: user.followers || 0,
+        following: user.following || 0,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to fetch user profile",
+        error: error.message,
+      });
+  }
+};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export { registerUser, loginUser, refreshAccessToken };

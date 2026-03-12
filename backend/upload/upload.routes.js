@@ -6,10 +6,7 @@ import { authMiddleware } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-/**
- * Upload file (creator only)
- * Protected route
- */
+
 router.post(
   "/",
   authMiddleware,

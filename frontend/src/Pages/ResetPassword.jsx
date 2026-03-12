@@ -1,8 +1,15 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import api from "../utils/api";
 import toast from "react-hot-toast";
-import { Lock, Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2 } from "lucide-react";
+import {
+  Lock,
+  Eye,
+  EyeOff,
+  KeyRound,
+  ArrowLeft,
+  CheckCircle2,
+} from "lucide-react";
 
 const bg = "linear-gradient(135deg, #0f0c29 0%, #1a1a3e 45%, #24243e 100%)";
 const gradText = {
@@ -29,7 +36,10 @@ function PwInput({ name, placeholder, value, onChange, autoComplete }) {
         boxShadow: focused ? "0 0 0 3px #6366f110" : "none",
       }}
     >
-      <Lock size={16} style={{ color: focused ? "#818cf8" : "#475569", flexShrink: 0 }} />
+      <Lock
+        size={16}
+        style={{ color: focused ? "#818cf8" : "#475569", flexShrink: 0 }}
+      />
       <input
         type={show ? "text" : "password"}
         name={name}
@@ -42,7 +52,12 @@ function PwInput({ name, placeholder, value, onChange, autoComplete }) {
         className="flex-1 bg-transparent outline-none text-sm"
         style={{ color: "#e2e8f0" }}
       />
-      <button type="button" onClick={() => setShow((v) => !v)} style={{ color: "#475569" }} className="hover:text-indigo-400 transition-colors">
+      <button
+        type="button"
+        onClick={() => setShow((v) => !v)}
+        style={{ color: "#475569" }}
+        className="hover:text-indigo-400 transition-colors"
+      >
         {show ? <EyeOff size={15} /> : <Eye size={15} />}
       </button>
     </div>
@@ -52,11 +67,15 @@ function PwInput({ name, placeholder, value, onChange, autoComplete }) {
 const RULES = [
   { label: "At least 8 characters", test: (p) => p.length >= 8 },
   { label: "Contains a number", test: (p) => /\d/.test(p) },
-  { label: "Contains a special character", test: (p) => /[^a-zA-Z0-9]/.test(p) },
+  {
+    label: "Contains a special character",
+    test: (p) => /[^a-zA-Z0-9]/.test(p),
+  },
 ];
 
 function ResetPassword() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -73,35 +92,41 @@ function ResetPassword() {
       return;
     }
     if (strength < 2) {
-      toast.error("Please choose a stronger password", { style: toastStyle(false) });
+      toast.error("Please choose a stronger password", {
+        style: toastStyle(false),
+      });
       return;
     }
     setLoading(true);
     try {
-      // token usually comes from URL param: new URLSearchParams(window.location.search).get("token")
-      const token = new URLSearchParams(window.location.search).get("token") || "";
-      const { data } = await axios.post(
-        "http://localhost:5000/api/v1/auth/reset-password",
-        { token, password: form.password }
-      );
+      const token = searchParams.get("token") || "";
+      const { data } = await api.post("/v1/auth/reset-password", {
+        token,
+        password: form.password,
+      });
       if (data.success) {
         setDone(true);
-        toast.success("Password reset successfully!", { style: toastStyle(true) });
+        toast.success("Password reset successfully!", {
+          style: toastStyle(true),
+        });
       } else {
-        toast.error(data.message || "Reset failed", { style: toastStyle(false) });
+        toast.error(data.message || "Reset failed", {
+          style: toastStyle(false),
+        });
       }
     } catch (err) {
-      toast.error(
-        err?.response?.data?.message || "Server error. Try again.",
-        { style: toastStyle(false) }
-      );
+      toast.error(err?.response?.data?.message || "Server error. Try again.", {
+        style: toastStyle(false),
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const strengthColor = ["#f87171", "#f87171", "#fbbf24", "#4ade80"][strength] || "#f87171";
-  const strengthLabel = ["Too weak", "Weak", "Fair", "Strong"][strength] || "Too weak";
+  const strengthColor =
+    ["#f87171", "#f87171", "#fbbf24", "#4ade80"][strength] || "#f87171";
+  const strengthLabel =
+    ["Too weak", "Weak", "Fair", "Strong"][strength] || "Too weak";
 
   return (
     <div
@@ -109,7 +134,18 @@ function ResetPassword() {
       style={{ background: bg }}
     >
       {/* orbs */}
-      <div style={{ position: "fixed", bottom: "-8%", right: "-5%", width: "450px", height: "450px", borderRadius: "50%", background: "radial-gradient(circle, #6366f114 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div
+        style={{
+          position: "fixed",
+          bottom: "-8%",
+          right: "-5%",
+          width: "450px",
+          height: "450px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, #6366f114 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
 
       <div
         className="relative w-full max-w-md rounded-3xl p-8 flex flex-col gap-6"
@@ -135,11 +171,16 @@ function ResetPassword() {
             <div className="flex flex-col items-center gap-3">
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 8px 24px #6366f135" }}
+                style={{
+                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  boxShadow: "0 8px 24px #6366f135",
+                }}
               >
                 <KeyRound size={24} style={{ color: "#fff" }} />
               </div>
-              <h1 className="text-2xl font-bold" style={gradText}>Reset password</h1>
+              <h1 className="text-2xl font-bold" style={gradText}>
+                Reset password
+              </h1>
               <p className="text-sm text-center" style={{ color: "#64748b" }}>
                 Choose a new secure password for your account.
               </p>
@@ -148,7 +189,12 @@ function ResetPassword() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {/* new password */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium" style={{ color: "#64748b" }}>New Password</label>
+                <label
+                  className="text-xs font-medium"
+                  style={{ color: "#64748b" }}
+                >
+                  New Password
+                </label>
                 <PwInput
                   name="password"
                   placeholder="Min. 8 characters"
@@ -165,11 +211,16 @@ function ResetPassword() {
                         <div
                           key={i}
                           className="flex-1 h-1.5 rounded-full transition-all duration-300"
-                          style={{ background: strength > i ? strengthColor : "#ffffff10" }}
+                          style={{
+                            background:
+                              strength > i ? strengthColor : "#ffffff10",
+                          }}
                         />
                       ))}
                     </div>
-                    <p className="text-xs" style={{ color: strengthColor }}>{strengthLabel}</p>
+                    <p className="text-xs" style={{ color: strengthColor }}>
+                      {strengthLabel}
+                    </p>
                   </div>
                 )}
 
@@ -182,9 +233,17 @@ function ResetPassword() {
                         <div key={label} className="flex items-center gap-1.5">
                           <CheckCircle2
                             size={12}
-                            style={{ color: ok ? "#4ade80" : "#334155", flexShrink: 0 }}
+                            style={{
+                              color: ok ? "#4ade80" : "#334155",
+                              flexShrink: 0,
+                            }}
                           />
-                          <span className="text-xs" style={{ color: ok ? "#94a3b8" : "#334155" }}>{label}</span>
+                          <span
+                            className="text-xs"
+                            style={{ color: ok ? "#94a3b8" : "#334155" }}
+                          >
+                            {label}
+                          </span>
                         </div>
                       );
                     })}
@@ -194,7 +253,12 @@ function ResetPassword() {
 
               {/* confirm */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium" style={{ color: "#64748b" }}>Confirm Password</label>
+                <label
+                  className="text-xs font-medium"
+                  style={{ color: "#64748b" }}
+                >
+                  Confirm Password
+                </label>
                 <PwInput
                   name="confirm"
                   placeholder="Repeat your password"
@@ -204,10 +268,14 @@ function ResetPassword() {
                 />
                 {/* mismatch hint */}
                 {form.confirm.length > 0 && form.password !== form.confirm && (
-                  <p className="text-xs" style={{ color: "#f87171" }}>Passwords don't match</p>
+                  <p className="text-xs" style={{ color: "#f87171" }}>
+                    Passwords don't match
+                  </p>
                 )}
                 {form.confirm.length > 0 && form.password === form.confirm && (
-                  <p className="text-xs" style={{ color: "#4ade80" }}>✓ Passwords match</p>
+                  <p className="text-xs" style={{ color: "#4ade80" }}>
+                    ✓ Passwords match
+                  </p>
                 )}
               </div>
 
@@ -227,7 +295,9 @@ function ResetPassword() {
                     Resetting…
                   </span>
                 ) : (
-                  <><KeyRound size={15} /> Reset Password</>
+                  <>
+                    <KeyRound size={15} /> Reset Password
+                  </>
                 )}
               </button>
             </form>
@@ -242,7 +312,9 @@ function ResetPassword() {
               <CheckCircle2 size={32} style={{ color: "#4ade80" }} />
             </div>
             <div>
-              <h2 className="text-xl font-bold mb-1" style={gradText}>Password updated!</h2>
+              <h2 className="text-xl font-bold mb-1" style={gradText}>
+                Password updated!
+              </h2>
               <p className="text-sm" style={{ color: "#64748b" }}>
                 Your password has been reset successfully. You can now sign in.
               </p>
