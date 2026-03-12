@@ -27,7 +27,6 @@ const NAV_LINKS = [
 ];
 
 const PROFILE_LINKS = [
- { label: "My Profile", to: `/creator-profile?id=${User?._id}`, icon: User },
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Reset Password", to: "/reset-password", icon: KeyRound },
   { label: "Settings", to: "/settings", icon: Settings },
@@ -83,9 +82,7 @@ function Navbar() {
       <nav
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{
-          background: scrolled
-            ? "rgba(15,12,41,0.88)"
-            : "rgba(15,12,41,0.60)",
+          background: scrolled ? "rgba(15,12,41,0.88)" : "rgba(15,12,41,0.60)",
           backdropFilter: "blur(18px)",
           WebkitBackdropFilter: "blur(18px)",
           borderBottom: scrolled
@@ -95,14 +92,12 @@ function Navbar() {
         }}
       >
         <div className="flex items-center justify-between px-5 md:px-10 h-16">
-
           {/* Logo */}
           <Link
             to="/"
             className="flex items-center gap-2 font-bold text-xl select-none"
             style={{
-              background:
-                "linear-gradient(135deg,#e0e7ff,#c4b5fd,#818cf8)",
+              background: "linear-gradient(135deg,#e0e7ff,#c4b5fd,#818cf8)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -110,8 +105,7 @@ function Navbar() {
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{
-                background:
-                  "linear-gradient(135deg,#6366f1,#8b5cf6)",
+                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
               }}
             >
               <CloudUpload size={14} style={{ color: "#fff" }} />
@@ -121,7 +115,7 @@ function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map(({ label, to, icon: Icon }) => (
+            {NAV_LINKS.map(({ label, to, icon: NavIcon }) => (
               <Link
                 key={to}
                 to={to}
@@ -134,7 +128,7 @@ function Navbar() {
                     : "1px solid transparent",
                 }}
               >
-                <Icon size={14} />
+                <NavIcon size={14} />
                 {label}
               </Link>
             ))}
@@ -142,11 +136,11 @@ function Navbar() {
 
           {/* Search */}
           <div
-            className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl ml-4 mr-auto"
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl ml-2 md:ml-4 mr-auto"
             style={{
               background: "#ffffff08",
               border: "1px solid #ffffff10",
-              width: "220px",
+              width: window.innerWidth < 768 ? "140px" : "220px",
             }}
           >
             <SearchIcon size={14} style={{ color: "#64748b" }} />
@@ -158,13 +152,16 @@ function Navbar() {
 
                 if (q) {
                   navigate(`/search?q=${encodeURIComponent(q)}`);
+                  e.target.reset();
                 }
               }}
             >
               <input
                 name="search"
                 autoComplete="off"
-                placeholder="Search files..."
+                placeholder={
+                  window.innerWidth < 768 ? "Search..." : "Search files..."
+                }
                 className="bg-transparent outline-none text-xs w-full"
                 style={{ color: "#cbd5e1" }}
               />
@@ -173,7 +170,6 @@ function Navbar() {
 
           {/* Auth section */}
           <div className="hidden md:flex items-center gap-3">
-
             {!isLoggedIn ? (
               <>
                 <Link
@@ -193,8 +189,7 @@ function Navbar() {
                   to="/register"
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold"
                   style={{
-                    background:
-                      "linear-gradient(135deg,#6366f1,#8b5cf6)",
+                    background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
                     color: "#fff",
                   }}
                 >
@@ -204,11 +199,13 @@ function Navbar() {
               </>
             ) : (
               <div className="relative" ref={dropdownRef}>
-
                 <button
                   onClick={() => setDropOpen(!dropOpen)}
-                  className="flex items-center gap-1.5 py-1 pl-1 pr-2.5 rounded-xl cursor-pointer"
-                  style={{ border: "1px solid #ffffff12" }}
+                  className="flex items-center gap-1.5 py-1 pl-1 pr-2.5 rounded-xl cursor-pointer transition-all duration-200"
+                  style={{
+                    border: "1px solid #ffffff12",
+                    background: dropOpen ? "#ffffff12" : "transparent",
+                  }}
                 >
                   <img
                     src={user?.avatar || userImg}
@@ -220,9 +217,8 @@ function Navbar() {
                     size={13}
                     style={{
                       color: "#64748b",
-                      transform: dropOpen
-                        ? "rotate(180deg)"
-                        : "rotate(0)",
+                      transform: dropOpen ? "rotate(180deg)" : "rotate(0)",
+                      transition: "transform 200ms ease",
                     }}
                   />
                 </button>
@@ -234,6 +230,8 @@ function Navbar() {
                       background: "rgba(20,18,50,0.95)",
                       border: "1px solid #ffffff12",
                       boxShadow: "0 16px 48px #00000060",
+                      zIndex: 1000,
+                      animation: "slideDown 200ms ease",
                     }}
                   >
                     <div
@@ -249,15 +247,25 @@ function Navbar() {
                         {user?.username || "User"}
                       </p>
 
-                      <p
-                        className="text-xs"
-                        style={{ color: "#475569" }}
-                      >
+                      <p className="text-xs" style={{ color: "#475569" }}>
                         @{user?.email?.split("@")[0]}
                       </p>
                     </div>
 
-                    {PROFILE_LINKS.map(({ label, to, icon: Icon }) => (
+                    <Link
+                      to="/profile"
+                      onClick={() => setDropOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-white/5"
+                      style={{
+                        color: "#94a3b8",
+                        borderBottom: "1px solid #ffffff10",
+                      }}
+                    >
+                      <User size={14} />
+                      My Profile
+                    </Link>
+
+                    {PROFILE_LINKS.map(({ label, to, icon: ProfileIcon }) => (
                       <Link
                         key={label}
                         to={to}
@@ -265,7 +273,7 @@ function Navbar() {
                         className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-white/5"
                         style={{ color: "#94a3b8" }}
                       >
-                        <Icon size={14} />
+                        <ProfileIcon size={14} />
                         {label}
                       </Link>
                     ))}
@@ -303,19 +311,17 @@ function Navbar() {
             className="md:hidden px-5 pb-5 flex flex-col gap-2"
             style={{ borderTop: "1px solid #ffffff10" }}
           >
-            {NAV_LINKS.map(({ label, to, icon: Icon }) => (
+            {NAV_LINKS.map(({ label, to, icon: MobileIcon }) => (
               <Link
                 key={to}
                 to={to}
                 className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
                 style={{
-                  background: isActive(to)
-                    ? "#6366f118"
-                    : "transparent",
+                  background: isActive(to) ? "#6366f118" : "transparent",
                   color: "#94a3b8",
                 }}
               >
-                <Icon size={15} />
+                <MobileIcon size={15} />
                 {label}
               </Link>
             ))}
@@ -337,8 +343,7 @@ function Navbar() {
                   to="/register"
                   className="flex-1 text-center py-2.5 rounded-xl"
                   style={{
-                    background:
-                      "linear-gradient(135deg,#6366f1,#8b5cf6)",
+                    background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
                     color: "#fff",
                   }}
                 >
@@ -346,22 +351,54 @@ function Navbar() {
                 </Link>
               </div>
             ) : (
-              <button
-                className="mt-2 py-2.5 rounded-xl"
-                style={{ background: "#ef4444", color: "#fff" }}
-                onClick={async () => {
-                  await logout();
-                  navigate("/");
-                }}
-              >
-                Logout
-              </button>
+              <div className="flex flex-col gap-2 mt-2">
+                <Link
+                  to="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
+                  style={{
+                    background: "#6366f110",
+                    border: "1px solid #6366f130",
+                    color: "#c4b5fd",
+                  }}
+                >
+                  <User size={15} />
+                  My Profile
+                </Link>
+                <button
+                  className="w-full text-center py-2.5 rounded-xl transition-colors duration-200 hover:bg-red-600/20"
+                  style={{
+                    background: "#ef444420",
+                    color: "#f87171",
+                    border: "1px solid #f8717130",
+                  }}
+                  onClick={async () => {
+                    await logout();
+                    setMenuOpen(false);
+                    navigate("/");
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
             )}
           </div>
         )}
       </nav>
 
       <div style={{ height: "64px" }} />
+      <style>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </>
   );
 }

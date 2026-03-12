@@ -142,7 +142,7 @@ function Search() {
                       </p>
                     </div>
                     <Link
-                      to={`/FileDetail?id=${file._id}`}
+                      to={`/file/${file._id}`}
                       className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10"
                       title="View"
                     >
@@ -196,7 +196,7 @@ function Search() {
                       </p>
                     </div>
                     <Link
-                      to={`/CreatorProfile?id=${profile._id}`}
+                      to={`/creator-profile/${profile._id}`}
                       className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10"
                       title="View Profile"
                     >

@@ -33,16 +33,18 @@ function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    // Clear state immediately to prevent flashing logged-in UI
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    // Notify backend
     try {
       await api.post("/v1/auth/logout");
     } catch (error) {
       console.error("Logout error:", error);
     }
-
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
   };
 
   const isAuthenticated = () => !!user && !!token;

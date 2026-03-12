@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import  AuthContext  from "../context/AuthContext";
+import AuthContext from "../context/AuthContext";
 import api from "../utils/api";
 import toast from "react-hot-toast";
 import { Mail, Lock, LogIn, Eye, EyeOff, CloudUpload } from "lucide-react";
@@ -85,15 +85,33 @@ function Login() {
       if (data.success) {
         // Use AuthContext to update app state
         login(data.user, data.token);
-        toast.success("Welcome back! 🎉");
-        navigate("/dashboard");
+        toast.success("Welcome back! 🎉", {
+          style: toastStyle(true),
+        });
+        // Use setTimeout to ensure state is updated before navigation
+        setTimeout(() => {
+          console.log("Navigating to dashboard...");
+          navigate("/dashboard", { replace: true });
+        }, 1000);
       } else {
         toast.error(data.message || "Login failed", {
           style: toastStyle(false),
         });
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Server error. Try again.", {
+      const errorMessage = err?.response?.data?.message;
+
+      // Provide specific error messages
+      let finalMessage = "Server error. Try again.";
+      if (errorMessage) {
+        finalMessage = errorMessage;
+      } else if (err?.response?.status === 401) {
+        finalMessage = "Invalid email or password";
+      } else if (err?.message === "Network Error") {
+        finalMessage = "Cannot connect to server";
+      }
+
+      toast.error(finalMessage, {
         style: toastStyle(false),
       });
     } finally {
