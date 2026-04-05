@@ -78,7 +78,7 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await api.post("/v1/auth/login", {
+      const { data } = await api.post("/api/v1/auth/login", {
         email: formData.email,
         password: formData.password,
       });
@@ -88,11 +88,10 @@ function Login() {
         toast.success("Welcome back! 🎉", {
           style: toastStyle(true),
         });
-        // Use setTimeout to ensure state is updated before navigation
+        // Navigate to dashboard after brief delay
         setTimeout(() => {
-          console.log("Navigating to dashboard...");
           navigate("/dashboard", { replace: true });
-        }, 1000);
+        }, 50);
       } else {
         toast.error(data.message || "Login failed", {
           style: toastStyle(false),

@@ -41,7 +41,7 @@ function AuthProvider({ children }) {
 
     // Notify backend
     try {
-      await api.post("/v1/auth/logout");
+      await api.post("/api/v1/auth/logout");
     } catch (error) {
       console.error("Logout error:", error);
     }

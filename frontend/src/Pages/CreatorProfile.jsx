@@ -75,7 +75,7 @@ function CreatorProfile() {
       setLoading(true);
       try {
         const [creatorRes, filesRes] = await Promise.all([
-          api.get(`/v1/auth/profile/${userId}`).catch((err) => {
+          api.get(`/api/v1/auth/profile/${userId}`).catch((err) => {
             console.error("Creator fetch failed:", err);
             return { data: { success: false, user: null } };
           }),

@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AuthContext  from "../context/AuthContext";
+import AuthContext from "../context/AuthContext";
 import api from "../utils/api";
 import toast from "react-hot-toast";
 import {
@@ -28,7 +28,7 @@ const toastStyle = (success) => ({
 });
 
 function InputField({
-  icon: Icon,
+  icon: InputIcon, // eslint-disable-line no-unused-vars
   type,
   name,
   placeholder,
@@ -49,7 +49,7 @@ function InputField({
         boxShadow: focused ? "0 0 0 3px #6366f110" : "none",
       }}
     >
-      <Icon
+      <InputIcon
         size={16}
         style={{ color: focused ? "#818cf8" : "#475569", flexShrink: 0 }}
       />
@@ -109,7 +109,7 @@ function Register() {
     }
     setLoading(true);
     try {
-      const { data } = await api.post("/v1/auth/register", {
+      const { data } = await api.post("/api/v1/auth/register", {
         username: formData.name,
         email: formData.email,
         password: formData.password,
@@ -118,7 +118,9 @@ function Register() {
         toast.success("Account created! 🎉", { style: toastStyle(true) });
         // Optionally auto-login after registration
         login(data.user, data.token);
-        navigate("/Dashboard");
+        setTimeout(() => {
+          navigate("/dashboard", { replace: true });
+        }, 50);
       } else {
         toast.error(data.message || "Registration failed", {
           style: toastStyle(false),

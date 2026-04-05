@@ -48,6 +48,7 @@ function Navbar() {
   useEffect(() => {
     setMenuOpen(false);
     setDropOpen(false);
+    // eslint-disable react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   /* Navbar glass effect on scroll */
@@ -115,6 +116,7 @@ function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
+            {/* eslint-disable-next-line no-unused-vars */}
             {NAV_LINKS.map(({ label, to, icon: NavIcon }) => (
               <Link
                 key={to}
@@ -265,6 +267,7 @@ function Navbar() {
                       My Profile
                     </Link>
 
+                    {/* eslint-disable-next-line no-unused-vars */}
                     {PROFILE_LINKS.map(({ label, to, icon: ProfileIcon }) => (
                       <Link
                         key={label}
@@ -311,10 +314,12 @@ function Navbar() {
             className="md:hidden px-5 pb-5 flex flex-col gap-2"
             style={{ borderTop: "1px solid #ffffff10" }}
           >
+            {/* eslint-disable-next-line no-unused-vars */}
             {NAV_LINKS.map(({ label, to, icon: MobileIcon }) => (
               <Link
                 key={to}
                 to={to}
+                onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
                 style={{
                   background: isActive(to) ? "#6366f118" : "transparent",

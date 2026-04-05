@@ -206,6 +206,7 @@ function Dashboard() {
         {/* stats */}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          {/* eslint-disable-next-line no-unused-vars */}
           {stats.map(({ icon: IconComponent, label, value, change }) => (
             <div
               key={label}

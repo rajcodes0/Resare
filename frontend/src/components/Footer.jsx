@@ -48,7 +48,6 @@ function Footer() {
       {/* ── top section ── */}
       <div className="px-6 md:px-16 pt-14 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-
           {/* brand col */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             {/* logo */}
@@ -56,27 +55,34 @@ function Footer() {
               to="/"
               className="flex items-center gap-2 font-bold text-xl w-fit"
               style={{
-                background: "linear-gradient(135deg, #e0e7ff, #c4b5fd, #818cf8)",
+                background:
+                  "linear-gradient(135deg, #e0e7ff, #c4b5fd, #818cf8)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
             >
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+                style={{
+                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                }}
               >
                 <CloudUpload size={14} style={{ color: "#fff" }} />
               </div>
               Resare
             </Link>
 
-            <p className="text-sm leading-relaxed max-w-xs" style={{ color: "#64748b" }}>
-              The open platform for sharing files, notes, and creative assets with
-              students and teams — instant, free, and under 25 MB.
+            <p
+              className="text-sm leading-relaxed max-w-xs"
+              style={{ color: "#64748b" }}
+            >
+              The open platform for sharing files, notes, and creative assets
+              with students and teams — instant, free, and under 25 MB.
             </p>
 
             {/* socials */}
             <div className="flex gap-2 mt-1">
+              {/* eslint-disable-next-line no-unused-vars */}
               {SOCIALS.map(({ icon: Icon, label, href }) => (
                 <a
                   key={label}
@@ -99,13 +105,19 @@ function Footer() {
               className="mt-2 rounded-2xl p-4 flex flex-col gap-3"
               style={{ background: "#ffffff06", border: "1px solid #ffffff0a" }}
             >
-              <p className="text-xs font-semibold" style={{ color: "#94a3b8" }}>Get updates</p>
+              <p className="text-xs font-semibold" style={{ color: "#94a3b8" }}>
+                Get updates
+              </p>
               <div className="flex gap-2">
                 <input
                   type="email"
                   placeholder="your@email.com"
                   className="flex-1 rounded-xl px-3 py-2 text-xs outline-none"
-                  style={{ background: "#ffffff08", border: "1px solid #ffffff10", color: "#e2e8f0" }}
+                  style={{
+                    background: "#ffffff08",
+                    border: "1px solid #ffffff10",
+                    color: "#e2e8f0",
+                  }}
                 />
                 <button
                   className="px-4 py-2 rounded-xl text-xs font-semibold transition-all hover:-translate-y-0.5 hover:opacity-90"
@@ -136,8 +148,12 @@ function Footer() {
                   to={to}
                   className="flex items-center gap-1 text-sm transition-colors duration-200 group"
                   style={{ color: "#64748b" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#c4b5fd")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#64748b")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = "#c4b5fd")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = "#64748b")
+                  }
                 >
                   {label}
                   <ArrowUpRight
@@ -160,11 +176,11 @@ function Footer() {
           color: "#334155",
         }}
       >
-        <p>
-          © {new Date().getFullYear()} Resare. All rights reserved.
-        </p>
+        <p>© {new Date().getFullYear()} Resare. All rights reserved.</p>
         <p className="flex items-center gap-1">
-          Built with <Heart size={11} fill="#f87171" style={{ color: "#f87171" }} /> by Raj Sharma
+          Built with{" "}
+          <Heart size={11} fill="#f87171" style={{ color: "#f87171" }} /> by Raj
+          Sharma
         </p>
       </div>
     </footer>
