@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import  { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import api from "../utils/api";
@@ -116,10 +116,9 @@ function Register() {
       });
       if (data.success) {
         toast.success("Account created! 🎉", { style: toastStyle(true) });
-        // Optionally auto-login after registration
-        login(data.user, data.token);
+        // Navigation to login page after registration
         setTimeout(() => {
-          navigate("/dashboard", { replace: true });
+          navigate("/login", { replace: true });
         }, 50);
       } else {
         toast.error(data.message || "Registration failed", {

@@ -26,10 +26,21 @@ function AuthProvider({ children }) {
   }, []);
 
   const login = (userData, accessToken) => {
-    setUser(userData);
+    // Ensure _id is set for consistency
+    const userWithId = {
+      ...userData,
+      _id: userData._id || userData.id,
+    };
+    setUser(userWithId);
     setToken(accessToken);
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(userWithId));
     localStorage.setItem("token", accessToken);
+    console.log("User logged in:", userWithId);
+  };
+
+  const updateUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   const logout = async () => {
@@ -51,7 +62,15 @@ function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, login, logout, isAuthenticated }}
+      value={{
+        user,
+        setUser: updateUser,
+        token,
+        loading,
+        login,
+        logout,
+        isAuthenticated,
+      }}
     >
       {children}
     </AuthContext.Provider>

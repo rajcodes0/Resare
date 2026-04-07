@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minlength: 3,
-      maxlength: 30
+      maxlength: 30,
     },
 
     email: {
@@ -34,8 +34,8 @@ const UserSchema = new mongoose.Schema(
           const domain = value.split("@")[1];
           return allowedDomains.includes(domain);
         },
-        message: "Email provider not supported"
-      }
+        message: "Email provider not supported",
+      },
     },
 
     password: {
@@ -43,27 +43,80 @@ const UserSchema = new mongoose.Schema(
       minlength: 6,
       required: function () {
         return this.provider === "local";
-      }
+      },
     },
 
     provider: {
       type: String,
       enum: ["local", "google", "github", "apple"],
-      default: "local"
+      default: "local",
     },
 
     providerId: {
-      type: String
+      type: String,
     },
 
     refreshToken: {
-      type: String
+      type: String,
     },
 
     resetPasswordToken: String,
-    resetPasswordExpire: Date
+    resetPasswordExpire: Date,
+
+    bio: {
+      type: String,
+      default: "",
+    },
+
+    location: {
+      type: String,
+      default: "",
+    },
+
+    avatar: {
+      type: String,
+      default: null,
+    },
+
+    socialLinks: {
+      instagram: {
+        type: String,
+        default: null,
+      },
+      twitter: {
+        type: String,
+        default: null,
+      },
+      linkedin: {
+        type: String,
+        default: null,
+      },
+      portfolio: {
+        type: String,
+        default: null,
+      },
+      website: {
+        type: String,
+        default: null,
+      },
+    },
+
+    followers: {
+      type: Number,
+      default: 0,
+    },
+
+    following: {
+      type: Number,
+      default: 0,
+    },
+
+    downloads: {
+      type: Number,
+      default: 0,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 UserSchema.pre("save", async function () {
   // 1. If password hasn't changed, do nothing and return

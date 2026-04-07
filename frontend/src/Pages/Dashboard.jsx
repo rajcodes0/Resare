@@ -27,61 +27,87 @@ import {
 
 const fileIcon = (type) => {
   const props = { size: 16 };
+  const fileType = (type || "link").toLowerCase();
 
-  if (type === "pdf")
+  if (fileType.includes("pdf"))
     return <FileText {...props} style={{ color: "#f87171" }} />;
 
-  if (type === "image")
+  if (fileType.includes("image"))
     return <Image {...props} style={{ color: "#34d399" }} />;
 
-  if (type === "zip")
+  if (fileType.includes("zip") || fileType.includes("compressed"))
     return <Archive {...props} style={{ color: "#fbbf24" }} />;
 
   return <LinkIcon {...props} style={{ color: "#60a5fa" }} />;
 };
 
 const typeBadge = (type) => {
-  const map = {
-    pdf: { bg: "#f8717115", color: "#f87171", label: "PDF" },
-    image: { bg: "#34d39915", color: "#34d399", label: "Image" },
-    zip: { bg: "#fbbf2415", color: "#fbbf24", label: "ZIP" },
-    link: { bg: "#60a5fa15", color: "#60a5fa", label: "Link" },
-  };
+  const fileType = (type || "link").toLowerCase();
 
-  return map[type] || map.link;
+  if (fileType.includes("pdf")) {
+    return { bg: "#f8717115", color: "#f87171", label: "PDF" };
+  }
+  if (fileType.includes("image")) {
+    return { bg: "#34d39915", color: "#34d399", label: "Image" };
+  }
+  if (fileType.includes("zip") || fileType.includes("compressed")) {
+    return { bg: "#fbbf2415", color: "#fbbf24", label: "ZIP" };
+  }
+
+  return { bg: "#60a5fa15", color: "#60a5fa", label: "Link" };
 };
 
 function Dashboard() {
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const { theme } = useContext(ThemeContext);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [followers, setFollowers] = useState(0);
+  const [activities, setActivities] = useState([]);
 
   const fetchFiles = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Try to fetch user's files specifically
-      const { data } = await api.get("/v1/files/my").catch(() => {
-        // Fallback to general files endpoint if /my doesn't exist
-        return api.get("/files");
+      // Fetch user's files from the correct endpoint
+      const filesRes = await api.get("/api/files/my").catch(() => {
+        // Fallback to general files endpoint
+        return api.get("/api/files");
       });
 
-      if (data?.success && Array.isArray(data.files)) {
-        // Filter to show only current user's files
-        const userFiles = data.files.filter(
-          (f) => f.creatorId === user._id || f.creatorId?._id === user._id,
-        );
-        setFiles(userFiles);
-      } else if (data?.files) {
-        // If no success flag but has files array
-        const userFiles = data.files.filter(
-          (f) => f.creatorId === user._id || f.creatorId?._id === user._id,
-        );
-        setFiles(userFiles);
+      if (filesRes.data?.success && Array.isArray(filesRes.data.files)) {
+        setFiles(filesRes.data.files);
+      } else if (filesRes.data?.files) {
+        setFiles(filesRes.data.files);
       } else {
         setFiles([]);
+      }
+
+      // Fetch user profile to get followers count
+      if (user?._id) {
+        try {
+          const userRes = await api.get(`/api/v1/auth/profile/${user._id}`);
+          if (userRes.data?.user) {
+            setFollowers(userRes.data.user.followers || 0);
+            // Update auth context if user data changed
+            if (setUser) {
+              setUser(userRes.data.user);
+            }
+          }
+        } catch (err) {
+          console.warn("Could not fetch profile details:", err);
+        }
+
+        // Fetch activities/action logs
+        try {
+          const activitiesRes = await api.get(`/api/actions`);
+          if (activitiesRes.data?.actions) {
+            setActivities(activitiesRes.data.actions.slice(0, 5));
+          }
+        } catch (err) {
+          console.warn("Could not fetch activities:", err);
+        }
       }
     } catch (error) {
       console.error("Failed to load files:", error);
@@ -90,18 +116,19 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [user._id]);
+  }, [user?._id, setUser]);
 
   // Refetch when user changes
   useEffect(() => {
     if (user?._id) {
+      console.log("Dashboard: User ID changed, fetching files for", user._id);
       fetchFiles();
     }
-  }, [user?._id, fetchFiles]);
+  }, [user?._id]);
 
   const deleteFile = async (id) => {
     try {
-      await api.delete(`/files/${id}`);
+      await api.delete(`/api/files/${id}`);
 
       setFiles((prev) => prev.filter((f) => f._id !== id));
 
@@ -113,9 +140,14 @@ function Dashboard() {
   };
 
   const filtered = files.filter((f) => {
-    const name = f.document?.originalName?.toLowerCase() || "";
+    const name = (
+      f.document?.title ||
+      f.document?.originalName ||
+      ""
+    ).toLowerCase();
+    const searchTerm = search.toLowerCase();
 
-    return name.includes(search.toLowerCase());
+    return name.includes(searchTerm);
   });
 
   const totalSize =
@@ -138,14 +170,14 @@ function Dashboard() {
     {
       icon: Download,
       label: "Downloads",
-      value: "0",
-      change: "coming soon",
+      value: user?.downloads || "0",
+      change: "total downloads",
     },
     {
       icon: Users,
       label: "Followers",
-      value: "0",
-      change: "coming soon",
+      value: followers.toString(),
+      change: "followers",
     },
   ];
 
@@ -313,25 +345,18 @@ function Dashboard() {
 
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {isLink && file.url
-                        ? file.url.split("/").pop() || file.url
-                        : file.document?.originalName || "Untitled"}
+                      {file.document?.title ||
+                        file.document?.originalName ||
+                        (file.url ? file.url.split("/").pop() : "Untitled")}
                     </p>
 
                     <p
                       className="text-xs"
                       style={{ color: theme.text.secondary }}
                     >
-                      {isLink && file.url ? (
-                        <span
-                          className="text-blue-400 hover:underline cursor-pointer"
-                          onClick={() => window.open(file.url, "_blank")}
-                        >
-                          {file.url}
-                        </span>
-                      ) : (
-                        `${((file.document?.fileSize || 0) / 1024 / 1024).toFixed(1)} MB`
-                      )}
+                      {file.document?.fileSize
+                        ? `${((file.document.fileSize || 0) / 1024 / 1024).toFixed(1)} MB`
+                        : "Link"}
                     </p>
                   </div>
 
@@ -378,17 +403,58 @@ function Dashboard() {
             border: theme.card.border,
           }}
         >
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-4">
             <Activity size={15} style={{ color: theme.highlight }} />
             <h2 className="font-semibold text-base">Recent Activity</h2>
           </div>
 
-          <div
-            className="text-center py-8 text-xs"
-            style={{ color: theme.text.secondary }}
-          >
-            Activity tracking coming soon
-          </div>
+          {activities.length === 0 ? (
+            <div
+              className="text-center py-8 text-xs"
+              style={{ color: theme.text.secondary }}
+            >
+              No recent activities
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {activities.map((activity, index) => (
+                <div
+                  key={activity._id || index}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg"
+                  style={{
+                    background: `${theme.highlight}10`,
+                    border: `1px solid ${theme.highlight}20`,
+                  }}
+                >
+                  <div>
+                    <p
+                      className="text-xs font-medium"
+                      style={{ color: theme.text.primary }}
+                    >
+                      {activity.action || "Activity"}
+                    </p>
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.text.secondary }}
+                    >
+                      {activity.createdAt
+                        ? new Date(activity.createdAt).toLocaleDateString()
+                        : "Recently"}
+                    </p>
+                  </div>
+                  <span
+                    className="text-xs px-2 py-1 rounded"
+                    style={{
+                      background: `${theme.highlight}20`,
+                      color: theme.highlight,
+                    }}
+                  >
+                    {activity.status || "Recorded"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

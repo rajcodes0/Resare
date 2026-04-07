@@ -77,11 +77,18 @@ const loginUser = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Login Successful ",
+      message: "Login Successful",
+      accessToken,
       user: {
+        _id: user._id,
         id: user._id,
         username: user.username,
         email: user.email,
+        avatar: user.avatar || null,
+        bio: user.bio || "",
+        downloads: user.downloads || 0,
+        followers: user.followers || 0,
+        socialLinks: user.socialLinks || {},
       },
     });
   } catch (error) {
@@ -135,13 +142,11 @@ export const searchProfiles = async (req, res) => {
 
     res.json({ success: true, users });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to search profiles",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to search profiles",
+      error: error.message,
+    });
   }
 };
 
@@ -159,25 +164,75 @@ export const getUserProfile = async (req, res) => {
     res.json({
       success: true,
       user: {
-        id: user._id,
+        _id: user._id,
         username: user.username,
         email: user.email,
         bio: user.bio || "",
         location: user.location || "",
+        avatar: user.avatar || null,
+        socialLinks: user.socialLinks || {},
         followers: user.followers || 0,
         following: user.following || 0,
+        downloads: user.downloads || 0,
         createdAt: user.createdAt,
       },
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch user profile",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch user profile",
+      error: error.message,
+    });
   }
 };
 
-export { registerUser, loginUser, refreshAccessToken };
+export const updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { bio, location, socialLinks } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Update fields
+    if (bio !== undefined) user.bio = bio;
+    if (location !== undefined) user.location = location;
+    if (socialLinks !== undefined) {
+      user.socialLinks = {
+        ...user.socialLinks,
+        ...socialLinks,
+      };
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        bio: user.bio,
+        location: user.location,
+        avatar: user.avatar,
+        socialLinks: user.socialLinks,
+        followers: user.followers,
+        following: user.following,
+        downloads: user.downloads,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update profile",
+      error: error.message,
+    });
+  }
+};
+
+export { registerUser, loginUser, refreshAccessToken,  };

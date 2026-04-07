@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import api from "../utils/api";
 import toast from "react-hot-toast";
 import ThemeContext from "../context/ThemeContext";
+import AuthContext from "../context/AuthContext";
 import userImg from "../assets/user.jpg";
 import { useParams } from "react-router-dom";
 
@@ -20,6 +21,7 @@ import {
   Share2,
   ExternalLink,
   Loader,
+  Globe,
 } from "lucide-react";
 
 const bg = "linear-gradient(135deg, #0f0c29 0%, #1a1a3e 45%, #24243e 100%)";
@@ -62,11 +64,13 @@ const StatPill = ({ value, label }) => (
 
 function CreatorProfile() {
   const { id: userId } = useParams();
+  const { user } = useContext(AuthContext);
 
   const [creator, setCreator] = useState(null);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [followed, setFollowed] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All");
   const [copiedShare, setCopiedShare] = useState(false);
 
@@ -79,7 +83,7 @@ function CreatorProfile() {
             console.error("Creator fetch failed:", err);
             return { data: { success: false, user: null } };
           }),
-          api.get(`/files`).catch((err) => {
+          api.get(`/files?creator=${userId}`).catch((err) => {
             console.error("Creator files fetch failed:", err);
             return { data: { success: false, files: [] } };
           }),
@@ -90,7 +94,10 @@ function CreatorProfile() {
         }
 
         if (filesRes.data?.success && filesRes.data?.files) {
-          setFiles(filesRes.data.files);
+          const creatorFiles = filesRes.data.files.filter(
+            (f) => f.creatorId._id === userId || f.creatorId === userId,
+          );
+          setFiles(creatorFiles);
         }
       } catch (err) {
         console.error("Error fetching creator data:", err);
@@ -109,6 +116,42 @@ function CreatorProfile() {
     navigator.clipboard?.writeText(window.location.href);
     setCopiedShare(true);
     setTimeout(() => setCopiedShare(false), 2000);
+  };
+
+  const handleFollow = async () => {
+    if (!user) {
+      toast.error("Please log in to follow");
+      return;
+    }
+
+    if (userId === user._id) {
+      toast.error("You cannot follow yourself");
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      // Try to follow without platform requirement first
+      const res = await api
+        .post(`/api/v1/follow/${userId}`, {
+          platform: "direct",
+        })
+        .catch((err) => {
+          // If that fails, show error
+          const errorMsg = err?.response?.data?.message || "Failed to follow";
+          throw new Error(errorMsg);
+        });
+
+      if (res.data?.message) {
+        setFollowed(true);
+        toast.success("Following creator!");
+      }
+    } catch (error) {
+      console.error("Follow error:", error);
+      toast.error(error.message || "Could not follow creator");
+    } finally {
+      setFollowLoading(false);
+    }
   };
 
   const filtered = files.filter((f) => {
@@ -260,8 +303,9 @@ function CreatorProfile() {
               </div>
               <div className="flex gap-3 flex-wrap">
                 <button
-                  onClick={() => setFollowed((v) => !v)}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5"
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={
                     followed
                       ? {
@@ -277,8 +321,25 @@ function CreatorProfile() {
                         }
                   }
                 >
-                  {followed ? <UserCheck size={15} /> : <UserPlus size={15} />}
-                  {followed ? "Following" : "Follow"}
+                  {followLoading ? (
+                    <>
+                      <Loader
+                        size={15}
+                        style={{ animation: "spin 1s linear infinite" }}
+                      />
+                      Following...
+                    </>
+                  ) : followed ? (
+                    <>
+                      <UserCheck size={15} />
+                      Following
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={15} />
+                      Follow
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={handleShare}
@@ -321,6 +382,96 @@ function CreatorProfile() {
                   Joined {new Date(creator.createdAt).toLocaleDateString()}
                 </span>
               </div>
+
+              {/* Social Links */}
+              {(creator?.socialLinks?.instagram ||
+                creator?.socialLinks?.twitter ||
+                creator?.socialLinks?.linkedin ||
+                creator?.socialLinks?.portfolio ||
+                creator?.socialLinks?.website) && (
+                <div className="flex gap-2 flex-wrap mt-3">
+                  {creator?.socialLinks?.instagram && (
+                    <a
+                      href={`https://instagram.com/${creator.socialLinks.instagram}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition hover:opacity-80"
+                      style={{
+                        background: "#c084fc30",
+                        color: "#c084fc",
+                        border: "1px solid #c084fc40",
+                      }}
+                    >
+                      <LinkIcon size={11} />
+                      Instagram
+                    </a>
+                  )}
+                  {creator?.socialLinks?.twitter && (
+                    <a
+                      href={`https://twitter.com/${creator.socialLinks.twitter}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition hover:opacity-80"
+                      style={{
+                        background: "#3b82f630",
+                        color: "#3b82f6",
+                        border: "1px solid #3b82f640",
+                      }}
+                    >
+                      <LinkIcon size={11} />
+                      Twitter
+                    </a>
+                  )}
+                  {creator?.socialLinks?.linkedin && (
+                    <a
+                      href={`https://linkedin.com/in/${creator.socialLinks.linkedin}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition hover:opacity-80"
+                      style={{
+                        background: "#0077b630",
+                        color: "#0077b6",
+                        border: "1px solid #0077b640",
+                      }}
+                    >
+                      <LinkIcon size={11} />
+                      LinkedIn
+                    </a>
+                  )}
+                  {creator?.socialLinks?.portfolio && (
+                    <a
+                      href={creator.socialLinks.portfolio}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition hover:opacity-80"
+                      style={{
+                        background: "#f59e0b30",
+                        color: "#f59e0b",
+                        border: "1px solid #f59e0b40",
+                      }}
+                    >
+                      <Globe size={11} />
+                      Portfolio
+                    </a>
+                  )}
+                  {creator?.socialLinks?.website && (
+                    <a
+                      href={creator.socialLinks.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition hover:opacity-80"
+                      style={{
+                        background: "#10b98130",
+                        color: "#10b981",
+                        border: "1px solid #10b98140",
+                      }}
+                    >
+                      <Globe size={11} />
+                      Website
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* stats */}
@@ -443,6 +594,7 @@ function CreatorProfile() {
 
       <style>{`
         .divide-x > * + * { border-left: 1px solid #ffffff10; }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );

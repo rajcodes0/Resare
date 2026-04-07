@@ -83,8 +83,17 @@ function Login() {
         password: formData.password,
       });
       if (data.success) {
-        // Use AuthContext to update app state
-        login(data.user, data.token);
+        // Ensure user object has all required fields
+        const userWithDefaults = {
+          ...data.user,
+          _id: data.user.id || data.user._id,
+          bio: data.user.bio || "",
+          downloads: data.user.downloads || 0,
+          followers: data.user.followers || 0,
+          socialLinks: data.user.socialLinks || {},
+        };
+        // Use AuthContext to update app state with token from response
+        login(userWithDefaults, data.accessToken);
         toast.success("Welcome back! 🎉", {
           style: toastStyle(true),
         });

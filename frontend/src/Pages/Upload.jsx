@@ -13,6 +13,7 @@ import api from "../utils/api";
 function Upload() {
   const [file, setFile] = useState(null);
   const [link, setLink] = useState("");
+  const [linkTitle, setLinkTitle] = useState("");
   const [uploadType, setUploadType] = useState("file"); // 'file' or 'link'
   const [active, setActive] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -67,7 +68,7 @@ function Upload() {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await api.post("/upload", formData);
+        const res = await api.post("/api/upload", formData);
 
         if (res.data.success || res.status === 201) {
           setActive(true);
@@ -106,8 +107,9 @@ function Upload() {
 
       setLoading(true);
       try {
-        const res = await api.post("/upload", {
+        const res = await api.post("/api/upload", {
           url: link,
+          title: linkTitle || new URL(link).hostname,
           isLink: true,
         });
 
@@ -118,6 +120,7 @@ function Upload() {
           // Reset after 2 seconds
           setTimeout(() => {
             setLink("");
+            setLinkTitle("");
             setActive(false);
           }, 2000);
         }
@@ -212,6 +215,7 @@ function Upload() {
             onClick={() => {
               setUploadType("link");
               setFile(null);
+              setLinkTitle("");
             }}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
             style={{
@@ -296,6 +300,39 @@ function Upload() {
               border: "1px solid #ffffff12",
             }}
           >
+            <label className="flex flex-col gap-2">
+              <span
+                className="text-sm font-medium"
+                style={{ color: "#cbd5e1" }}
+              >
+                Link Title (optional)
+              </span>
+              <input
+                type="text"
+                value={linkTitle}
+                onChange={(e) => setLinkTitle(e.target.value)}
+                placeholder="e.g., My Portfolio PDF"
+                className="px-4 py-3 rounded-xl bg-transparent border"
+                style={{
+                  borderColor: linkTitle ? "#6366f1" : "#ffffff12",
+                  color: "#cbd5e1",
+                  outline: "none",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "#6366f1";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = linkTitle
+                    ? "#6366f1"
+                    : "#ffffff12";
+                }}
+              />
+              <p className="text-xs" style={{ color: "#64748b" }}>
+                Give your link a descriptive title so others can find it
+              </p>
+            </label>
+
             <label className="flex flex-col gap-2">
               <span
                 className="text-sm font-medium"

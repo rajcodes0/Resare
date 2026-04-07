@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
     const query = { accessType: { $ne: "private" } };
 
     if (q) {
-      // Search by partial filename or creator username (case-insensitive)
+      // Search by partial filename, title, or creator username (case-insensitive)
       const users = await mongoose
         .model("User")
         .find({ username: { $regex: q, $options: "i" } })
@@ -23,6 +23,7 @@ router.get("/", async (req, res) => {
 
       query.$or = [
         { "document.originalName": { $regex: q, $options: "i" } },
+        { "document.title": { $regex: q, $options: "i" } },
         { creatorId: { $in: userIds } },
       ];
     }
@@ -50,6 +51,22 @@ router.get("/user/:userId", async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Failed to fetch user files" });
+  }
+});
+
+// Get current user's own files (protected route)
+router.get("/my", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const files = await File.find({ creatorId: userId })
+      .populate("creatorId", "username email")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, files });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch your files" });
   }
 });
 

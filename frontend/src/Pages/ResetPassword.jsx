@@ -100,27 +100,34 @@ function ResetPassword() {
     setLoading(true);
     try {
       const token = searchParams.get("token") || "";
-      const { data } = await api.post("/v1/auth/reset-password", {
-        token,
+      if (!token) {
+        toast.error("Invalid reset link. Please request a new one.", {
+          style: toastStyle(false),
+        });
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await api.post(`/api/v1/auth/reset-password/${token}`, {
         password: form.password,
       });
       if (data.success) {
-         setDone(true)
+        setDone(true);
         toast.success("Password reset successfully!", {
           style: toastStyle(true),
-         
         });
         setTimeout(() => {
           navigate("/login");
         }, 2000);
-        
       } else {
         toast.error(data.message || "Reset failed", {
           style: toastStyle(false),
         });
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Server error. Try again.", {
+      const errorMsg = err?.response?.data?.message || "Server error. Try again.";
+      console.error("Reset password error:", err);
+      toast.error(errorMsg, {
         style: toastStyle(false),
       });
     } finally {

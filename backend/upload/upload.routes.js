@@ -6,7 +6,6 @@ import { authMiddleware } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-
 router.post(
   "/",
   authMiddleware,
@@ -14,21 +13,21 @@ router.post(
     upload.single("file")(req, res, function (err) {
       if (err) {
         console.error("MULTER ERROR:", err);
-        
+
         if (err.code === "LIMIT_FILE_SIZE") {
           return res.status(400).json({
             message: "File too large",
             error: "Maximum file size is 50MB",
           });
         }
-        
+
         if (err.code === "INVALID_FILE_TYPE") {
           return res.status(400).json({
             message: "Invalid file type",
             error: err.message,
           });
         }
-        
+
         return res.status(500).json({
           message: "File upload error",
           error: err.message,
@@ -39,6 +38,41 @@ router.post(
   },
   async (req, res) => {
     try {
+      const isLink = req.body?.isLink;
+      const url = req.body?.url?.trim();
+
+      if (isLink) {
+        if (!url) {
+          return res.status(400).json({ message: "No URL provided" });
+        }
+
+        // Validate URL format
+        try {
+          new URL(url); // Will throw if invalid
+        } catch (err) {
+          return res.status(400).json({ message: "Invalid URL format" });
+        }
+
+        const savedFile = await File.create({
+          user: req.user._id,
+          creatorId: req.user._id,
+          document: {
+            url,
+            public_id: `link_${Date.now()}`,
+            originalName: url,
+            fileType: "link",
+            fileSize: 0,
+          },
+          accessType: "follow_to_unlock",
+        });
+
+        return res.status(201).json({
+          success: true,
+          message: "Link uploaded & saved",
+          file: savedFile,
+        });
+      }
+
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
@@ -85,7 +119,7 @@ router.post(
         error: error.message,
       });
     }
-  }
+  },
 );
 
 export default router;
