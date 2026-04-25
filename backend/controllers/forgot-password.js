@@ -22,7 +22,7 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`;
 
     await sendEmail({
       to: user.email,
@@ -30,20 +30,20 @@ const forgotPassword = async (req, res) => {
       html: `
         <h2>Password Reset</h2>
         <p>Click the link below to reset your password:</p>
-        <a href="${resetLink}">${resetLink}</a>
+        <a href="${resetLink}">Reset Password</a>
         <p>This link expires in 10 minutes.</p>
-      `
+      `,
     });
 
     // ✅ THIS WAS MISSING
     return res.status(200).json({
-      message: "Password reset email sent"
+      success: true,
+      message: "Password reset email sent",
     });
-
   } catch (error) {
     return res.status(500).json({
       message: "Internal server error",
-      error: error.message
+      error: error.message,
     });
   }
 };

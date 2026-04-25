@@ -103,7 +103,7 @@ function Search() {
             Loading results...
           </div>
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* FILES */}
             <div className="rounded-2xl overflow-hidden" style={card}>
               <div
@@ -118,11 +118,14 @@ function Search() {
                   Files ({files.length})
                 </h2>
               </div>
-              <div className="divide-y" style={{ borderColor: "#ffffff08" }}>
+              <div
+                className="divide-y max-h-96 overflow-y-auto"
+                style={{ borderColor: "#ffffff08" }}
+              >
                 {files.map((file) => (
                   <div
                     key={file._id}
-                    className="flex items-center gap-4 px-5 py-3.5 transition-colors duration-200 hover:bg-white/2 group"
+                    className="flex items-center gap-4 px-5 py-3.5 transition-colors duration-200 hover:bg-white/5 group"
                   >
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -175,11 +178,14 @@ function Search() {
                   Profiles ({profiles.length})
                 </h2>
               </div>
-              <div className="divide-y" style={{ borderColor: "#ffffff08" }}>
+              <div
+                className="divide-y max-h-96 overflow-y-auto"
+                style={{ borderColor: "#ffffff08" }}
+              >
                 {profiles.map((profile) => (
                   <div
                     key={profile._id}
-                    className="flex items-center gap-4 px-5 py-3.5 transition-colors duration-200 hover:bg-white/2 group"
+                    className="flex items-center gap-4 px-5 py-3.5 transition-colors duration-200 hover:bg-white/5 group"
                   >
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
@@ -194,10 +200,18 @@ function Search() {
                       >
                         {profile.username}
                       </p>
+                      {profile.bio && (
+                        <p
+                          className="text-xs truncate"
+                          style={{ color: "#64748b" }}
+                        >
+                          {profile.bio}
+                        </p>
+                      )}
                     </div>
                     <Link
                       to={`/creator-profile/${profile._id}`}
-                      className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10"
+                      className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10 shrink-0"
                       title="View Profile"
                     >
                       <ChevronRight size={15} style={{ color: "#34d399" }} />

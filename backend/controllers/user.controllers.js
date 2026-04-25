@@ -135,10 +135,17 @@ export const searchProfiles = async (req, res) => {
     const { q } = req.query;
     if (!q) return res.json({ users: [] });
 
-    // search username for text
+    // Search across username, bio, location, and email (case-insensitive, partial match)
     const users = await User.find({
-      username: { $regex: q, $options: "i" },
-    }).select("username email");
+      $or: [
+        { username: { $regex: q, $options: "i" } },
+        { bio: { $regex: q, $options: "i" } },
+        { location: { $regex: q, $options: "i" } },
+        { email: { $regex: q, $options: "i" } },
+      ],
+    }).select(
+      "username email bio location avatar followers -password -refreshToken",
+    );
 
     res.json({ success: true, users });
   } catch (error) {
@@ -235,4 +242,4 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, refreshAccessToken,  };
+export { registerUser, loginUser, refreshAccessToken };

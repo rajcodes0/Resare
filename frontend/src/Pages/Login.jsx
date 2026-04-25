@@ -211,7 +211,7 @@ function Login() {
                 Password
               </label>
               <Link
-                to="/forgot-Password"
+                to="/reset-email"
                 className="text-xs transition-colors hover:text-indigo-400"
                 style={{ color: "#818cf8" }}
               >

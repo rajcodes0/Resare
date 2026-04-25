@@ -39,6 +39,24 @@ const fileSchema = new mongoose.Schema(
       enum: ["public", "follow_to_unlock", "private"],
       default: "public",
     },
+
+    link: {
+      type: String,
+      default: null,
+      trim: true,
+      validate: {
+        validator: function (value) {
+          if (!value) return true;
+          try {
+            new URL(value);
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        message: "Invalid URL format",
+      },
+    },
   },
   { timestamps: true },
 );

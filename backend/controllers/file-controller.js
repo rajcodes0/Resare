@@ -1,10 +1,4 @@
-/**
- * DOWNLOAD FILE CONTROLLER
- * At this point:
- * - authMiddleware already ran
- * - checkFileAccess already ran
- * - req.file is guaranteed to exist and be allowed
- */
+
 export const downloadFile = async (req, res) => {
   try {
     const file = req.file;

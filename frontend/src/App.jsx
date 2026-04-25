@@ -12,6 +12,7 @@ import Register from "./Pages/Register";
 import Dashboard from "./Pages/Dashboard";
 import FileDetail from "./Pages/FileDetail";
 import ForgotPassword from "./Pages/ForgotPassword";
+import ResetEmail from "./Pages/ResetEmail";
 import ResetPassword from "./Pages/ResetPassword";
 import Upload from "./Pages/Upload";
 import CreatorProfile from "./Pages/CreatorProfile";
@@ -31,6 +32,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-email" element={<ResetEmail />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/search" element={<Search />} />
 
