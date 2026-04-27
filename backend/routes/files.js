@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import { authMiddleware } from "../middlewares/auth.js";
 import { checkFileAccess } from "../middlewares/checkFileAccess.js";
-import { downloadFile } from "../controllers/file-controller.js";
+import { downloadFile, deleteFile } from "../controllers/file-controller.js";
 import { File } from "../models/File.js";
 
 const router = express.Router();
@@ -72,5 +72,8 @@ router.get("/my", authMiddleware, async (req, res) => {
 
 // Download a file (with access check)
 router.get("/:fileId/download", authMiddleware, checkFileAccess, downloadFile);
+
+// Delete a file (protected route - owner only)
+router.delete("/:fileId", authMiddleware, deleteFile);
 
 export default router;

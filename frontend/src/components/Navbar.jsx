@@ -138,11 +138,11 @@ function Navbar() {
 
           {/* Search */}
           <div
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl ml-2 md:ml-4 mr-auto"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl ml-2 md:ml-4 mr-auto"
             style={{
               background: "#ffffff08",
               border: "1px solid #ffffff10",
-              width: window.innerWidth < 768 ? "140px" : "220px",
+              width: window.innerWidth < 640 ? "100px" : window.innerWidth < 768 ? "140px" : "220px",
             }}
           >
             <SearchIcon size={14} style={{ color: "#64748b" }} />
@@ -162,7 +162,7 @@ function Navbar() {
                 name="search"
                 autoComplete="off"
                 placeholder={
-                  window.innerWidth < 768 ? "Search..." : "Search files..."
+                  window.innerWidth < 640 ? "Search" : window.innerWidth < 768 ? "Search..." : "Search files..."
                 }
                 className="bg-transparent outline-none text-xs w-full"
                 style={{ color: "#cbd5e1" }}

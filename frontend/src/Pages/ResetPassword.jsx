@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../utils/api";
 import toast from "react-hot-toast";
@@ -79,6 +79,19 @@ function ResetPassword() {
   const [form, setForm] = useState({ password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+
+  // Check for token on page load
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (!token) {
+      toast.error("No reset token provided. Please request a new password reset.", {
+        style: toastStyle(false),
+      });
+      setTimeout(() => {
+        navigate("/forgot-password");
+      }, 2000);
+    }
+  }, [searchParams, navigate]);
 
   const handleChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
