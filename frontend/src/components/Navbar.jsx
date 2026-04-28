@@ -142,7 +142,12 @@ function Navbar() {
             style={{
               background: "#ffffff08",
               border: "1px solid #ffffff10",
-              width: window.innerWidth < 640 ? "100px" : window.innerWidth < 768 ? "140px" : "220px",
+              width:
+                window.innerWidth < 640
+                  ? "100px"
+                  : window.innerWidth < 768
+                    ? "140px"
+                    : "220px",
             }}
           >
             <SearchIcon size={14} style={{ color: "#64748b" }} />
@@ -153,7 +158,8 @@ function Navbar() {
                 const q = e.target.search.value.trim();
 
                 if (q) {
-                  navigate(`/search?q=${encodeURIComponent(q)}`);
+                  // Convert to lowercase for better case-insensitive search
+                  navigate(`/search?q=${encodeURIComponent(q.toLowerCase())}`);
                   e.target.reset();
                 }
               }}
@@ -162,7 +168,11 @@ function Navbar() {
                 name="search"
                 autoComplete="off"
                 placeholder={
-                  window.innerWidth < 640 ? "Search" : window.innerWidth < 768 ? "Search..." : "Search files..."
+                  window.innerWidth < 640
+                    ? "Search"
+                    : window.innerWidth < 768
+                      ? "Search..."
+                      : "Search files..."
                 }
                 className="bg-transparent outline-none text-xs w-full"
                 style={{ color: "#cbd5e1" }}

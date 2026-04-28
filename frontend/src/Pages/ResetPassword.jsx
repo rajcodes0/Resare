@@ -84,9 +84,12 @@ function ResetPassword() {
   useEffect(() => {
     const token = searchParams.get("token");
     if (!token) {
-      toast.error("No reset token provided. Please request a new password reset.", {
-        style: toastStyle(false),
-      });
+      toast.error(
+        "No reset token provided. Please request a new password reset.",
+        {
+          style: toastStyle(false),
+        },
+      );
       setTimeout(() => {
         navigate("/forgot-password");
       }, 2000);
@@ -138,7 +141,8 @@ function ResetPassword() {
         });
       }
     } catch (err) {
-      const errorMsg = err?.response?.data?.message || "Server error. Try again.";
+      const errorMsg =
+        err?.response?.data?.message || "Server error. Try again.";
       console.error("Reset password error:", err);
       toast.error(errorMsg, {
         style: toastStyle(false),

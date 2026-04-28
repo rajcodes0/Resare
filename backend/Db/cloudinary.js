@@ -40,4 +40,4 @@ const uploadOnCloudinary = async (localFilePath, { keepOnFail = true } = {}) => 
   }
 };
 
-export { uploadOnCloudinary };
+export default uploadOnCloudinary ;

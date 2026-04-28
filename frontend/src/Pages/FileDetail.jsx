@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import toast from "react-hot-toast";
+import AuthContext from "../context/AuthContext";
 import {
   FileText,
   Download,
@@ -12,6 +13,8 @@ import {
   Copy,
   Check,
   Loader,
+  Lock,
+  UserPlus,
 } from "lucide-react";
 
 const bg = "linear-gradient(135deg, #0f0c29 0%, #1a1a3e 45%, #24243e 100%)";
@@ -24,11 +27,16 @@ const gradText = {
 
 function FileDetail() {
   const { id: fileId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [hasAccess, setHasAccess] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     const fetchFile = async () => {
@@ -39,6 +47,33 @@ function FileDetail() {
 
         if (data?.success) {
           setFile(data.file);
+
+          // Check access based on file type
+          if (data.file.accessType === "follow_to_unlock" && user) {
+            // Check if user has followed the creator
+            try {
+              const creatorId = data.file.creatorId?._id || data.file.creatorId;
+              const followRes = await api
+                .get(`/api/v1/follow/${creatorId}/status`)
+                .catch(() => ({ data: { isFollowing: false } }));
+
+              setIsFollowing(followRes.data?.isFollowing || false);
+              setHasAccess(followRes.data?.isFollowing || false);
+            } catch (err) {
+              console.warn("Could not check follow status:", err);
+              setHasAccess(false);
+            }
+          } else if (data.file.accessType === "private" && user) {
+            // Check if user is the creator
+            setHasAccess(
+              data.file.creatorId?._id === user._id ||
+                data.file.creatorId === user._id,
+            );
+          } else if (data.file.accessType === "public") {
+            setHasAccess(true);
+          } else if (!user && data.file.accessType !== "public") {
+            setHasAccess(false);
+          }
         } else {
           toast.error("File not found");
         }
@@ -53,9 +88,14 @@ function FileDetail() {
     if (fileId) {
       fetchFile();
     }
-  }, [fileId]);
+  }, [fileId, user]);
 
   const handleDownload = async () => {
+    if (!hasAccess) {
+      toast.error("You must follow the creator to download this file");
+      return;
+    }
+
     if (!file?.document?.url) {
       toast.error("Download link unavailable");
       return;
@@ -73,6 +113,38 @@ function FileDetail() {
     } catch (err) {
       console.error("Download error:", err);
       toast.error("Failed to download file");
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!user) {
+      toast.error("Please log in to follow");
+      navigate("/login");
+      return;
+    }
+
+    if (isFollowing) {
+      toast.info("You are already following this creator");
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      const creatorId = file.creatorId?._id || file.creatorId;
+      const res = await api.post(`/api/v1/follow/${creatorId}`, {
+        platform: "direct",
+      });
+
+      if (res.data?.success) {
+        setIsFollowing(true);
+        setHasAccess(true);
+        toast.success("Following creator! File unlocked 🎉");
+      }
+    } catch (error) {
+      console.error("Follow error:", error);
+      toast.error(error?.response?.data?.message || "Could not follow creator");
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -210,15 +282,18 @@ function FileDetail() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5"
+                disabled={!hasAccess}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  background: hasAccess
+                    ? "linear-gradient(135deg, #6366f1, #8b5cf6)"
+                    : "linear-gradient(135deg, #64748b, #475569)",
                   color: "#fff",
-                  boxShadow: "0 6px 24px #6366f135",
+                  boxShadow: hasAccess ? "0 6px 24px #6366f135" : "none",
                 }}
               >
                 <Download size={16} />
-                Download
+                {hasAccess ? "Download" : "Locked"}
               </button>
 
               <button
@@ -255,6 +330,26 @@ function FileDetail() {
                 <Heart size={16} fill={liked ? "currentColor" : "none"} />
                 Like
               </button>
+
+              {!hasAccess && file?.accessType === "follow_to_unlock" && (
+                <button
+                  onClick={handleFollow}
+                  disabled={followLoading || isFollowing}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: "linear-gradient(135deg, #34d399, #10b981)",
+                    color: "#fff",
+                    boxShadow: "0 6px 24px #34d39935",
+                  }}
+                >
+                  <UserPlus size={16} />
+                  {followLoading
+                    ? "Following..."
+                    : isFollowing
+                      ? "Following"
+                      : "Follow to Unlock"}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -262,22 +357,33 @@ function FileDetail() {
         <div
           className="rounded-2xl p-6"
           style={{
-            background: "#ffffff08",
-            border: "1px solid #ffffff12",
+            background: hasAccess ? "#ffffff08" : "#f8717115",
+            border: hasAccess ? "1px solid #ffffff12" : "1px solid #f8717130",
           }}
         >
-          <h2 className="text-lg font-semibold mb-3">Access</h2>
+          <div className="flex items-start gap-3">
+            {!hasAccess && (
+              <Lock size={20} style={{ color: "#f87171", marginTop: "2px" }} />
+            )}
+            <div>
+              <h2 className="text-lg font-semibold mb-3">
+                {hasAccess ? "✅ Access Granted" : "🔒 Access Restricted"}
+              </h2>
 
-          <p style={{ color: "#94a3b8" }} className="text-sm">
-            {file.accessType === "public" &&
-              "🌍 Anyone with the link can view and download this file."}
+              <p style={{ color: "#94a3b8" }} className="text-sm">
+                {file?.accessType === "public" &&
+                  "🌍 Anyone with the link can view and download this file."}
 
-            {file.accessType === "private" &&
-              "🔒 This file is private. Only you can access it."}
+                {file?.accessType === "private" &&
+                  "🔒 This file is private. Only you can access it."}
 
-            {file.accessType === "follow_to_unlock" &&
-              "👥 Follow the creator to unlock this file."}
-          </p>
+                {file?.accessType === "follow_to_unlock" &&
+                  (hasAccess
+                    ? "👥 You are following this creator and can access all their files for 30 days."
+                    : "👥 Follow the creator to unlock this file and access all their content for 30 days.")}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

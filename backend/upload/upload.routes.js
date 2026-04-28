@@ -1,7 +1,7 @@
 import express from "express";
 import { upload } from "../middlewares/file.middleware.js";
 import { File } from "../models/File.js";
-import { uploadOnCloudinary } from "../Db/cloudinary.js";
+import  uploadOnCloudinary  from "../Db/cloudinary.js";
 import { authMiddleware } from "../middlewares/auth.js";
 
 const router = express.Router();
