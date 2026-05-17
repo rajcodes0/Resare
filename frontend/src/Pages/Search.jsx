@@ -45,7 +45,7 @@ function Search() {
   const [files, setFiles] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchType, setSearchType] = useState("all"); // all, files, profiles
+
 
   useEffect(() => {
     if (!q) {
@@ -58,18 +58,15 @@ function Search() {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        // Use lowercase for better case-insensitive searching
         const normalizedQuery = encodeURIComponent(q.toLowerCase());
 
         const [filesData, profilesData] = await Promise.all([
-          api.get(`/files?q=${normalizedQuery}`).catch((err) => {
-            console.error("Files search failed:", err);
-            return { data: { files: [] } };
-          }),
-          api.get(`/v1/auth/search?q=${normalizedQuery}`).catch((err) => {
-            console.error("Profiles search failed:", err);
-            return { data: { users: [] } };
-          }),
+          api
+            .get(`/api/files?q=${normalizedQuery}`)
+            .catch(() => ({ data: { files: [] } })),
+          api
+            .get(`/api/v1/auth/search?q=${normalizedQuery}`)
+            .catch(() => ({ data: { users: [] } })),
         ]);
 
         const filesResult = filesData?.data?.files || [];
@@ -78,11 +75,8 @@ function Search() {
         setFiles(filesResult);
         setProfiles(profilesResult);
 
-        // Show success/no results message
         if (filesResult.length === 0 && profilesResult.length === 0) {
-          toast.error(`No results found for "${q}"`, {
-            duration: 2000,
-          });
+          toast.error(`No results found for "${q}"`, { duration: 2000 });
         }
       } catch (err) {
         console.error("Search error:", err);

@@ -124,7 +124,7 @@ function Dashboard() {
       console.log("Dashboard: User ID changed, fetching files for", user._id);
       fetchFiles();
     }
-  }, [user?._id]);
+  }, [user?._id, fetchFiles]);
 
   const deleteFile = async (id) => {
     try {

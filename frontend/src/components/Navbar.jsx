@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
-
 import userImg from "../assets/user.jpg";
-
 import {
   Home,
   LayoutDashboard,
@@ -39,36 +37,27 @@ function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
-
   const dropdownRef = useRef(null);
-
   const isLoggedIn = !!user;
 
-  /* Close menu when route changes */
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setMenuOpen(false);
     setDropOpen(false);
-    // eslint-disable react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  /* Navbar glass effect on scroll */
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* Close dropdown when clicking outside */
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropOpen(false);
       }
     };
-
     window.addEventListener("mousedown", handleClickOutside);
     return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -86,14 +75,11 @@ function Navbar() {
           background: scrolled ? "rgba(15,12,41,0.88)" : "rgba(15,12,41,0.60)",
           backdropFilter: "blur(18px)",
           WebkitBackdropFilter: "blur(18px)",
-          borderBottom: scrolled
-            ? "1px solid #ffffff12"
-            : "1px solid transparent",
+          borderBottom: scrolled ? "1px solid #ffffff12" : "1px solid transparent",
           boxShadow: scrolled ? "0 4px 30px #00000040" : "none",
         }}
       >
         <div className="flex items-center justify-between px-5 md:px-10 h-16">
-          {/* Logo */}
           <Link
             to="/"
             className="flex items-center gap-2 font-bold text-xl select-none"
@@ -105,16 +91,13 @@ function Navbar() {
           >
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{
-                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-              }}
+              style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
             >
               <CloudUpload size={14} style={{ color: "#fff" }} />
             </div>
             Resare
           </Link>
 
-          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
             {/* eslint-disable-next-line no-unused-vars */}
             {NAV_LINKS.map(({ label, to, icon: NavIcon }) => (
@@ -125,9 +108,7 @@ function Navbar() {
                 style={{
                   background: isActive(to) ? "#6366f120" : "transparent",
                   color: isActive(to) ? "#c4b5fd" : "#94a3b8",
-                  border: isActive(to)
-                    ? "1px solid #6366f130"
-                    : "1px solid transparent",
+                  border: isActive(to) ? "1px solid #6366f130" : "1px solid transparent",
                 }}
               >
                 <NavIcon size={14} />
@@ -136,51 +117,29 @@ function Navbar() {
             ))}
           </div>
 
-          {/* Search */}
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl ml-2 md:ml-4 mr-auto"
-            style={{
-              background: "#ffffff08",
-              border: "1px solid #ffffff10",
-              width:
-                window.innerWidth < 640
-                  ? "100px"
-                  : window.innerWidth < 768
-                    ? "140px"
-                    : "220px",
-            }}
-          >
-            <SearchIcon size={14} style={{ color: "#64748b" }} />
-
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl ml-2 md:ml-4 mr-auto w-32 sm:w-40 md:w-56">
+            <SearchIcon size={14} style={{ color: "#64748b", flexShrink: 0 }} />
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 const q = e.target.search.value.trim();
-
                 if (q) {
-                  // Convert to lowercase for better case-insensitive search
                   navigate(`/search?q=${encodeURIComponent(q.toLowerCase())}`);
                   e.target.reset();
                 }
               }}
+              className="flex-1"
             >
               <input
                 name="search"
                 autoComplete="off"
-                placeholder={
-                  window.innerWidth < 640
-                    ? "Search"
-                    : window.innerWidth < 768
-                      ? "Search..."
-                      : "Search files..."
-                }
+                placeholder="Search..."
                 className="bg-transparent outline-none text-xs w-full"
                 style={{ color: "#cbd5e1" }}
               />
             </form>
           </div>
 
-          {/* Auth section */}
           <div className="hidden md:flex items-center gap-3">
             {!isLoggedIn ? (
               <>
@@ -196,7 +155,6 @@ function Navbar() {
                   <LogIn size={14} />
                   Login
                 </Link>
-
                 <Link
                   to="/register"
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold"
@@ -224,7 +182,6 @@ function Navbar() {
                     alt="user"
                     className="w-7 h-7 rounded-lg object-cover"
                   />
-
                   <ChevronDown
                     size={13}
                     style={{
@@ -234,7 +191,7 @@ function Navbar() {
                     }}
                   />
                 </button>
-
+                {/* dropdown */}
                 {dropOpen && (
                   <div
                     className="absolute right-0 mt-2 w-48 rounded-2xl overflow-hidden"
@@ -248,35 +205,24 @@ function Navbar() {
                   >
                     <div
                       className="px-4 py-3"
-                      style={{
-                        borderBottom: "1px solid #ffffff10",
-                      }}
+                      style={{ borderBottom: "1px solid #ffffff10" }}
                     >
-                      <p
-                        className="text-sm font-semibold"
-                        style={{ color: "#e2e8f0" }}
-                      >
+                      <p className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>
                         {user?.username || "User"}
                       </p>
-
                       <p className="text-xs" style={{ color: "#475569" }}>
                         @{user?.email?.split("@")[0]}
                       </p>
                     </div>
-
                     <Link
                       to="/profile"
                       onClick={() => setDropOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-white/5"
-                      style={{
-                        color: "#94a3b8",
-                        borderBottom: "1px solid #ffffff10",
-                      }}
+                      style={{ color: "#94a3b8", borderBottom: "1px solid #ffffff10" }}
                     >
                       <User size={14} />
                       My Profile
                     </Link>
-
                     {/* eslint-disable-next-line no-unused-vars */}
                     {PROFILE_LINKS.map(({ label, to, icon: ProfileIcon }) => (
                       <Link
@@ -290,7 +236,6 @@ function Navbar() {
                         {label}
                       </Link>
                     ))}
-
                     <button
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm"
                       style={{ color: "#f87171" }}
@@ -308,7 +253,6 @@ function Navbar() {
             )}
           </div>
 
-          {/* Mobile hamburger */}
           <button
             className="md:hidden p-2 rounded-lg"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -318,12 +262,8 @@ function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {menuOpen && (
-          <div
-            className="md:hidden px-5 pb-5 flex flex-col gap-2"
-            style={{ borderTop: "1px solid #ffffff10" }}
-          >
+          <div className="md:hidden px-5 pb-5 flex flex-col gap-2" style={{ borderTop: "1px solid #ffffff10" }}>
             {/* eslint-disable-next-line no-unused-vars */}
             {NAV_LINKS.map(({ label, to, icon: MobileIcon }) => (
               <Link
@@ -340,28 +280,12 @@ function Navbar() {
                 {label}
               </Link>
             ))}
-
             {!isLoggedIn ? (
               <div className="flex gap-2 mt-2">
-                <Link
-                  to="/login"
-                  className="flex-1 text-center py-2.5 rounded-xl"
-                  style={{
-                    background: "#ffffff08",
-                    border: "1px solid #ffffff10",
-                  }}
-                >
+                <Link to="/login" className="flex-1 text-center py-2.5 rounded-xl" style={{ background: "#ffffff08", border: "1px solid #ffffff10" }}>
                   Login
                 </Link>
-
-                <Link
-                  to="/register"
-                  className="flex-1 text-center py-2.5 rounded-xl"
-                  style={{
-                    background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                    color: "#fff",
-                  }}
-                >
+                <Link to="/register" className="flex-1 text-center py-2.5 rounded-xl" style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "#fff" }}>
                   Register
                 </Link>
               </div>
@@ -371,22 +295,14 @@ function Navbar() {
                   to="/profile"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
-                  style={{
-                    background: "#6366f110",
-                    border: "1px solid #6366f130",
-                    color: "#c4b5fd",
-                  }}
+                  style={{ background: "#6366f110", border: "1px solid #6366f130", color: "#c4b5fd" }}
                 >
                   <User size={15} />
                   My Profile
                 </Link>
                 <button
                   className="w-full text-center py-2.5 rounded-xl transition-colors duration-200 hover:bg-red-600/20"
-                  style={{
-                    background: "#ef444420",
-                    color: "#f87171",
-                    border: "1px solid #f8717130",
-                  }}
+                  style={{ background: "#ef444420", color: "#f87171", border: "1px solid #f8717130" }}
                   onClick={async () => {
                     await logout();
                     setMenuOpen(false);
@@ -404,14 +320,8 @@ function Navbar() {
       <div style={{ height: "64px" }} />
       <style>{`
         @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </>

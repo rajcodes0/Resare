@@ -17,7 +17,7 @@ function Upload() {
   const [uploadType, setUploadType] = useState("file"); // 'file' or 'link'
   const [active, setActive] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [_loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -166,6 +166,7 @@ function Upload() {
           </div>
           <button
             type="submit"
+             disabled={loading}
             className="px-8 py-2.5 rounded-xl text-sm font-semibold tracking-wide cursor-pointer transition-all duration-300"
             style={{
               background: active
@@ -183,7 +184,7 @@ function Upload() {
               e.currentTarget.style.transform = "translateY(0)";
             }}
           >
-            {active ? "✓ Uploaded" : "Upload"}
+           {loading ? "Uploading…" : active ? "✓ Uploaded" : "Upload"}
           </button>
         </div>
 

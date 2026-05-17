@@ -1,6 +1,5 @@
 import  { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
 import api from "../utils/api";
 import toast from "react-hot-toast";
 import {
@@ -88,7 +87,6 @@ const PERKS = [
 
 function Register() {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     name: "",
     email: "",

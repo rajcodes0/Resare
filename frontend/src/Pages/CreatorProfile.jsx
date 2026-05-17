@@ -133,7 +133,7 @@ function CreatorProfile() {
     try {
       // Try to follow without platform requirement first
       const res = await api
-        .post(`/api/v1/follow/${userId}`, {
+        .post(`/api/follow/${userId}`, {
           platform: "direct",
         })
         .catch((err) => {

@@ -43,7 +43,7 @@ function FileDetail() {
       try {
         setLoading(true);
 
-        const { data } = await api.get(`/files/${fileId}`);
+        const { data } = await api.get(`/api/files/${fileId}`);
 
         if (data?.success) {
           setFile(data.file);
@@ -54,7 +54,7 @@ function FileDetail() {
             try {
               const creatorId = data.file.creatorId?._id || data.file.creatorId;
               const followRes = await api
-                .get(`/api/v1/follow/${creatorId}/status`)
+                .get(`/api/follow/${creatorId}/status`)
                 .catch(() => ({ data: { isFollowing: false } }));
 
               setIsFollowing(followRes.data?.isFollowing || false);
@@ -103,7 +103,7 @@ function FileDetail() {
 
     try {
       // Try to track download if backend supports it
-      await api.post(`/files/${fileId}/download`).catch(() => {
+      await api.post(`/api/files/${fileId}/download`).catch(() => {
         // Silently ignore if endpoint doesn't exist, still proceed with download
       });
 
@@ -131,7 +131,7 @@ function FileDetail() {
     setFollowLoading(true);
     try {
       const creatorId = file.creatorId?._id || file.creatorId;
-      const res = await api.post(`/api/v1/follow/${creatorId}`, {
+      const res = await api.post(`/api/follow/${creatorId}`, {
         platform: "direct",
       });
 
